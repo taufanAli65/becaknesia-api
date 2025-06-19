@@ -4,7 +4,9 @@ export interface ISchedule extends Document {
     tour_id: Types.ObjectId,
     times: string,
     available: boolean,
-    user_id: Types.ObjectId
+    user_id: Types.ObjectId,
+    created_at: Date,
+    updated_at: Date
 }
 
 const scheduleSchema = new Schema({
@@ -16,7 +18,9 @@ const scheduleSchema = new Schema({
         required: true
     },
     user_id: {type: Types.ObjectId, ref: "Users", required: true}
-})
+}, {
+    timestamps: {createdAt: "created_at", updatedAt: "updated_at"}
+});
 
 const Schedule = model<ISchedule>("Schedules", scheduleSchema);
 
