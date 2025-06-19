@@ -1,10 +1,10 @@
 import { Schema, model, Types } from "mongoose";
 
 export enum orderStatus {
-    Menunggu = "menunggu",
-    Diterima = "diterima",
-    Selesai = "selesai",
-    Dibatalkan = "dibatalkan"
+    Waiting = "waiting",
+    Accepted = "Accepted",
+    Done = "done",
+    Canceled = "Canceled"
 }
 
 export enum paymentMethod {
@@ -22,8 +22,8 @@ export interface IOrder extends Document {
 }
 
 const orderSchema = new Schema ({
-    user_id: {type: Schema.Types.ObjectId, ref: "User", required: true},
-    tour_id: {type: String, required: true}, // TODO: Use ref: "Tour", need to create tour model first
+    user_id: {type: Schema.Types.ObjectId, ref: "Users", required: true},
+    tour_id: {type: Schema.Types.ObjectId, ref: "Tours", required: true},
     payment_method: {
         type: String,
         enum: Object.values(paymentMethod),
@@ -33,7 +33,7 @@ const orderSchema = new Schema ({
         type: String,
         enum: Object.values(orderStatus),
         required: true,
-        default: orderStatus.Menunggu
+        default: orderStatus.Waiting
     },
     total: {type: String, required: true}
 }, {
