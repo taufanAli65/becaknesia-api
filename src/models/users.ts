@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 export enum userRoles {
     User = "user",
@@ -43,7 +43,7 @@ const userSchema = new Schema({
         type: String,
         enum: Object.values(userRoles),
         required: true,
-        default: userStatus.Nonaktif,
+        default: userStatus.Nonaktif, // User need to verify the email in order to be activated
     },
     photoUrl: {type: String, required: true}
 });
