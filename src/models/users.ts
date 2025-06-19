@@ -20,7 +20,9 @@ export interface IUser extends Document {
     status: userStatus,
     photoUrl: string,
     created_at: Date,
-    update_at: Date
+    update_at: Date,
+    verificationToken?: string,
+    verificationTokenExpires?: Date
 }
 
 const userSchema = new Schema({
@@ -47,7 +49,9 @@ const userSchema = new Schema({
         required: true,
         default: userStatus.Nonaktif, // User need to verify the email in order to be activated
     },
-    photoUrl: {type: String, required: true}
+    photoUrl: {type: String, required: true},
+    verificationToken: {type: String},
+    verificationTokenExpires: {type: Date}
 }, {
     timestamps: {createdAt: "created_at", updatedAt: "update_at"}
 });
