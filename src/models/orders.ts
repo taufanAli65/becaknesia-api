@@ -23,7 +23,7 @@ export interface IOrder extends Document {
 
 const orderSchema = new Schema ({
     user_id: {type: Schema.Types.ObjectId, ref: "User", required: true},
-    tour_id: {type: String, required: true}, // TODO: Use red: "Tour", need to create tour model first
+    tour_id: {type: String, required: true}, // TODO: Use ref: "Tour", need to create tour model first
     payment_method: {
         type: String,
         enum: Object.values(paymentMethod),
