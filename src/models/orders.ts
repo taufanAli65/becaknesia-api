@@ -25,7 +25,9 @@ export interface IOrder extends Document {
     tour_id: Types.ObjectId,
     order_status: orderStatus,
     total: number,
-    payment_status: paymentStatus
+    payment_status: paymentStatus,
+    pickup_location: string,
+    pickup_time: string
 }
 
 const orderSchema = new Schema ({
@@ -48,7 +50,9 @@ const orderSchema = new Schema ({
         enum: Object.values(paymentStatus),
         required: true,
         default: paymentStatus.Pending
-    }
+    },
+    pickup_location: {type: String, required: true},
+    pickup_time: {type: String, required: true}
 }, {
     timestamps: {createdAt: "created_at", updatedAt: "update_at"}
 });
