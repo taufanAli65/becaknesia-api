@@ -2,6 +2,7 @@ import { Schema, model, Types } from "mongoose";
 
 export interface ITourReview extends Document {
     user_id: Types.ObjectId,
+    tour_id: Types.ObjectId,
     stars: number,
     comment: string,
     created_at: Date,
@@ -10,6 +11,7 @@ export interface ITourReview extends Document {
 
 const tourReviewSchema = new Schema({
     user_id: {type: Types.ObjectId, ref: "Users", required: true},
+    tour_id: {type: Types.ObjectId, ref: "Tours", required: true},
     stars: {type: Number, required: true},
     comment: {type: String, required: true}
 }, {
