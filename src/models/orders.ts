@@ -7,6 +7,12 @@ export enum orderStatus {
     Canceled = "Canceled"
 }
 
+export enum paymentStatus {
+    Failed = "failed",
+    Success = "success",
+    Pending = "pending"
+}
+
 export enum paymentMethod {
     Cash = "cash",
     Qris = "qris",
@@ -18,7 +24,8 @@ export interface IOrder extends Document {
     update_at: Date,
     tour_id: Types.ObjectId,
     order_status: orderStatus,
-    total: number
+    total: number,
+    payment_status: paymentStatus
 }
 
 const orderSchema = new Schema ({
@@ -35,7 +42,13 @@ const orderSchema = new Schema ({
         required: true,
         default: orderStatus.Waiting
     },
-    total: {type: String, required: true}
+    total: {type: String, required: true},
+    payment_status: {
+        type: String,
+        enum: Object.values(paymentStatus),
+        required: true,
+        default: paymentStatus.Pending
+    }
 }, {
     timestamps: {createdAt: "created_at", updatedAt: "update_at"}
 });
