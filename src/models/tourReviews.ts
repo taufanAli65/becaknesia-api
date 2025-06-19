@@ -1,6 +1,6 @@
 import { Schema, model, Types } from "mongoose";
 
-export interface IReview extends Document {
+export interface ITourReview extends Document {
     user_id: Types.ObjectId,
     stars: number,
     comment: string,
@@ -8,7 +8,7 @@ export interface IReview extends Document {
     updated_at: Date
 }
 
-const reviewSchema = new Schema({
+const tourReviewSchema = new Schema({
     user_id: {type: Types.ObjectId, ref: "Users", required: true},
     stars: {type: Number, required: true},
     comment: {type: String, required: true}
@@ -16,6 +16,6 @@ const reviewSchema = new Schema({
     timestamps: {createdAt: "created_at", updatedAt: "updated_at"}
 });
 
-const TourReview = model<IReview>("Reviews", reviewSchema);
+const TourReview = model<ITourReview>("tourReviews", tourReviewSchema);
 
 export default TourReview;
