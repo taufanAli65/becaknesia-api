@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { validate } from "../utils/validate";
-import { activateUserService, registerService } from "../services/auth";
+import { activateUserService, registerService, resendVerificationEmailService } from "../services/auth";
 import { sendFail, sendSuccess } from "../utils/senResponse";
-import { registerSchema, verifyEmailSchema } from "../validators/auth";
+import { registerSchema, verifyEmailSchema, resendVerificationEmailSchema } from "../validators/auth";
 
 export const register = async(req: Request, res: Response, next: NextFunction ): Promise<Response | void> => {
     try {
@@ -20,6 +20,20 @@ export const activateUser = async(req: Request, res: Response, next: NextFunctio
         const { token } = validate(verifyEmailSchema, req.query);
         await activateUserService(token as string);
         return sendSuccess(res, 200, "User activated successfully. You can now log in.");
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+    }
+}
+
+export const resendVerificationEmail = async(req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+    try {
+        const { email } = validate(resendVerificationEmailSchema, req.body);
+        if (!email) {
+            return sendFail(res, 400, "Email is required");
+        }
+        await resendVerificationEmailService(email);
+        return sendSuccess(res, 200, "Verification email sent successfully. Please check your inbox.");
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         return sendFail(res, 400, errorMessage, error);
