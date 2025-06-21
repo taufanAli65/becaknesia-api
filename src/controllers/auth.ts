@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { validate } from "../utils/validate";
-import { activateUserService, registerService, resendVerificationEmailService } from "../services/auth";
+import { activateUserService, registerService, resendVerificationEmailService, loginService } from "../services/auth";
 import { sendFail, sendSuccess } from "../utils/senResponse";
-import { registerSchema, verifyEmailSchema, resendVerificationEmailSchema } from "../validators/auth";
+import { registerSchema, verifyEmailSchema, resendVerificationEmailSchema, loginSchema } from "../validators/auth";
 
 export const register = async(req: Request, res: Response, next: NextFunction ): Promise<Response | void> => {
     try {
@@ -34,6 +34,17 @@ export const resendVerificationEmail = async(req: Request, res: Response, next: 
         }
         await resendVerificationEmailService(email);
         return sendSuccess(res, 200, "Verification email sent successfully. Please check your inbox.");
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+    }
+}
+
+export const login = async(req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+    try {
+        const { email, password } = validate(loginSchema, req.body);
+        const token = await loginService(email, password);
+        return sendSuccess(res, 200, "Login successful", { "token": token });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         return sendFail(res, 400, errorMessage, error);

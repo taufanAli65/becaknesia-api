@@ -3,6 +3,8 @@ import { sendEmail } from "../helpers/sendEmail";
 import generateVerificationToken from "../helpers/generateVerificationToken";
 import { hashPassword } from "../helpers/hashPassword";
 import { AppError } from "../utils/appError";
+import comparePassword from "../helpers/comparePassword";
+import jwt from "jsonwebtoken";
 
 
 async function registerService(name: string, password: string, email: string, no_hp: string, role: userRoles, photoUrl?: string): Promise<void> {
@@ -71,4 +73,22 @@ async function resendVerificationEmailService(email: string): Promise<void> {
     });
 }
 
-export {registerService, activateUserService, resendVerificationEmailService};
+async function loginService(email: string, password: string): Promise<string> {
+    const user = await User.findOne({ email });
+    if(!user) throw AppError("Invalid email or password", 401);
+    const isPasswordValid = await comparePassword(password, user.password);
+    if (!isPasswordValid) {
+        throw AppError("Invalid password", 401);
+    }
+    if (user.status !== userStatus.Aktif) {
+        throw AppError("User not activated. Please verify your email.", 403);
+    }
+    const token = jwt.sign(
+        { id: user._id.toString(), email: user.email, role: user.role },
+        process.env.JWT_SECRET as string,
+        { expiresIn: "1d" }
+    );
+    return token;
+}
+
+export {registerService, activateUserService, resendVerificationEmailService, loginService};
