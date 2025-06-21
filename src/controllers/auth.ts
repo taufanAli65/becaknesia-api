@@ -10,7 +10,8 @@ export const register = async(req: Request, res: Response, next: NextFunction ):
         await registerService(name, password, email, no_hp, role, photoUrl);
         return sendSuccess(res, 201, "Registration successful. Please check your email to verify your account.");
     } catch (error) {
-        return sendFail(res, 400, "Registration failed", error);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
     }
 }
 
@@ -20,6 +21,7 @@ export const activateUser = async(req: Request, res: Response, next: NextFunctio
         await activateUserService(token as string);
         return sendSuccess(res, 200, "User activated successfully. You can now log in.");
     } catch (error) {
-        return sendFail(res, 400, "Activation failed", error);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
     }
 }

@@ -6,6 +6,8 @@ import { AppError } from "../utils/appError";
 
 
 async function registerService(name: string, password: string, email: string, no_hp: string, role: userRoles, photoUrl?: string) {
+    const userExists = await User.findOne({ email });
+    if (userExists) throw AppError("Email already registered", 400);
     const hashedPassword = await hashPassword(password);
     const user = new User({
         name,
