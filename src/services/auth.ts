@@ -1,17 +1,18 @@
-import User, {userRoles} from "../models/users";
+import User, {userRoles, userStatus} from "../models/users";
 import { sendEmail } from "../helpers/sendEmail";
 import generateVerificationToken from "../helpers/generateVerificationToken";
 import { hashPassword } from "../helpers/hashPassword";
+import { AppError } from "../utils/appError";
 
 
-async function registerService(name: string, password: string, email: string, no_hp: string, roles: userRoles, photoUrl?: string) {
+async function registerService(name: string, password: string, email: string, no_hp: string, role: userRoles, photoUrl?: string) {
     const hashedPassword = await hashPassword(password);
     const user = new User({
         name,
         password: hashedPassword,
         email,
         no_hp,
-        roles,
+        role,
         photoUrl
     })
     await user.save();
@@ -21,7 +22,7 @@ async function registerService(name: string, password: string, email: string, no
     await user.save();
 
     // Send verification email
-    const verificationUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${process.env.VERIFICATION_URL}/auth/activate?token=${verificationToken}`;
     await sendEmail({
         to: user.email,
         subject: "Verifikasi Email Anda",
@@ -33,4 +34,15 @@ async function registerService(name: string, password: string, email: string, no
     });
 }
 
-export {registerService};
+async function activateUserService(token: string) {
+    const user = await User.findOne({ verificationToken: token});
+    if (!user) {
+        throw AppError("Invalid or expired verification token", 400);
+    }
+    user.status = userStatus.Aktif;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+}
+
+export {registerService, activateUserService};

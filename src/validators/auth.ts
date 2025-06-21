@@ -6,7 +6,7 @@ export const registerSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters long"),
     email: z.string().email("Invalid email address"),
     no_hp: z.string().min(10, "Phone number must be at least 10 characters long"),
-    roles: z.nativeEnum(userRoles, {
+    role: z.nativeEnum(userRoles, {
         errorMap: () => ({ message: "Invalid role" })
     }),
     photoUrl: z.string().url("Invalid photo URL")

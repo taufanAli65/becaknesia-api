@@ -1,9 +1,11 @@
+import { AppError } from "../utils/appError";
+
 const validateEmailConfig = () => {
   if (!process.env.EMAIL_USER) {
-    throw new Error("EMAIL_USER is required for nodemailer configuration");
+    throw AppError("EMAIL_USER is required for nodemailer configuration", 500);
   }
   if (!process.env.EMAIL_PASS) {
-    throw new Error("EMAIL_PASSWORD is required for nodemailer configuration");
+    throw AppError("EMAIL_PASS is required for nodemailer configuration", 500);
   }
 };
 
