@@ -4,7 +4,7 @@ import generateVerificationToken from "../helpers/generateVerificationToken";
 import { hashPassword } from "../helpers/hashPassword";
 
 
-async function register(name: string, password: string, email: string, no_hp: string, roles: userRoles, photoUrl: string) {
+async function registerService(name: string, password: string, email: string, no_hp: string, roles: userRoles, photoUrl?: string) {
     const hashedPassword = await hashPassword(password);
     const user = new User({
         name,
@@ -33,4 +33,4 @@ async function register(name: string, password: string, email: string, no_hp: st
     });
 }
 
-export {register};
+export {registerService};

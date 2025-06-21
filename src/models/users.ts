@@ -7,7 +7,7 @@ export enum userRoles {
 }
 
 export enum userStatus {
-    Aktif = "aktif",
+    Aktif = "aktif", // if the user already verified via email
     Nonaktif = "nonaktif"
 }
 
@@ -45,7 +45,7 @@ const userSchema = new Schema({
     },
     status: {
         type: String,
-        enum: Object.values(userRoles),
+        enum: Object.values(userStatus),
         required: true,
         default: userStatus.Nonaktif, // User need to verify the email in order to be activated
     },

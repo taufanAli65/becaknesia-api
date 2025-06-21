@@ -4,12 +4,16 @@ import express from "express";
 import connectDatabase from "./config/connection";
 import cors from "cors";
 
+import authRoutes from "./routes/auth";
+
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors()) // Allow all connection
+
+app.use("/auth", authRoutes);
 
 connectDatabase().then(() => {
     app.listen(PORT, () => {
