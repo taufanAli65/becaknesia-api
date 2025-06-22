@@ -8,8 +8,7 @@ export const registerSchema = z.object({
     no_hp: z.string().min(10, "Phone number must be at least 10 characters long"),
     role: z.nativeEnum(userRoles, {
         errorMap: () => ({ message: "Invalid role" })
-    }),
-    photoUrl: z.string().url("Invalid photo URL")
+    })
 });
 
 export const loginSchema = z.object({

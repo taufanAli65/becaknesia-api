@@ -3,17 +3,25 @@ import { validate } from "../utils/validate";
 import { activateUserService, registerService, resendVerificationEmailService, loginService } from "../services/auth";
 import { sendFail, sendSuccess } from "../utils/senResponse";
 import { registerSchema, verifyEmailSchema, resendVerificationEmailSchema, loginSchema } from "../validators/auth";
+import { uploadProfilePhoto } from "../helpers/supabaseUpload";
 
-export const register = async(req: Request, res: Response, next: NextFunction ): Promise<Response | void> => {
+export const register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, password, email, no_hp, role, photoUrl } = validate(registerSchema, req.body);
+        const { name, password, email, no_hp, role } = req.body;
+        let photoUrl = "";
+
+        if (req.file) {
+            photoUrl = await uploadProfilePhoto(req.file);
+        } else {
+            return sendFail(res, 400, "Photo is required");
+        }
         await registerService(name, password, email, no_hp, role, photoUrl);
         return sendSuccess(res, 201, "Registration successful. Please check your email to verify your account.");
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         return sendFail(res, 400, errorMessage, error);
     }
-}
+};
 
 export const activateUser = async(req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
