@@ -7,7 +7,7 @@ import { uploadProfilePhoto } from "../helpers/supabaseUpload";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, password, email, no_hp, role } = req.body;
+        const { name, password, email, no_hp, role } = validate(registerSchema, req.body);
         let photoUrl = "";
 
         if (req.file) {
@@ -36,7 +36,11 @@ export const activateUser = async(req: Request, res: Response, next: NextFunctio
 
 export const resendVerificationEmail = async(req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
-        const { email } = validate(resendVerificationEmailSchema, req.body);
+        const user = req.user;
+        if (!user) {
+            return sendFail(res, 401, "Unauthorized access");
+        }
+        const { email } = validate(resendVerificationEmailSchema, user);
         if (!email) {
             return sendFail(res, 400, "Email is required");
         }
