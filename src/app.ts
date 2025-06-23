@@ -5,6 +5,7 @@ import connectDatabase from "./config/connection";
 import cors from "cors";
 
 import authRoutes from "./routes/auth";
+import adminRoutes from "./routes/admin"
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(cors()) // Allow all connection
 
 app.use("/auth", authRoutes);
+app.use("/admin", adminRoutes);
 
 connectDatabase().then(() => {
     app.listen(PORT, () => {

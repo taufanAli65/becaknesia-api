@@ -103,7 +103,7 @@ async function updateUserService(userId: string, updateData: Partial<{ name: str
         }
         user.email = updateData.email;
         user.status = userStatus.Nonaktif;
-        
+
         const verificationToken = generateVerificationToken(user);
         await user.save();
 
