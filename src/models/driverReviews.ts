@@ -11,7 +11,7 @@ export interface IDriverReview {
 
 const driverReviewSchema = new Schema({
     user_id: {type: Types.ObjectId, ref: "Users", required: true}, // The one who's write the review
-    driver_id: {type: Types.ObjectId, ref: "Users", required: true}, // The one who's getting reviewed
+    driver_id: {type: Types.ObjectId, ref: "Drivers", required: true}, // The one who's getting reviewed
     stars: {type: Number, required: true},
     comment: {type: String, required: true}
 }, {
