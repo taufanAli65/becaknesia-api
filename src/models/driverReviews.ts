@@ -18,6 +18,6 @@ const driverReviewSchema = new Schema({
     timestamps: {createdAt: "created_at", updatedAt: "updated_at"}
 });
 
-const driverReview = model<IDriverReview>("driverReviews", driverReviewSchema);
+const driverReview = model<IDriverReview>("DriverReviews", driverReviewSchema);
 
 export default driverReview;

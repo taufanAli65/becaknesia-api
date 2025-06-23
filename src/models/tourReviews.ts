@@ -18,6 +18,6 @@ const tourReviewSchema = new Schema({
     timestamps: {createdAt: "created_at", updatedAt: "updated_at"}
 });
 
-const TourReview = model<ITourReview>("tourReviews", tourReviewSchema);
+const TourReview = model<ITourReview>("TourReviews", tourReviewSchema);
 
 export default TourReview;
