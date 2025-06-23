@@ -25,7 +25,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
 export const activateUser = async(req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
-        const { token } = validate(verifyEmailSchema, req.query);
+        const user = req.user;
+        const { token } = validate(verifyEmailSchema, user);
         await activateUserService(token as string);
         return sendSuccess(res, 200, "User activated successfully. You can now log in.");
     } catch (error) {
