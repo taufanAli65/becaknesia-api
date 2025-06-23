@@ -31,3 +31,11 @@ export const resetPasswordSchema = z.object({
 }).refine((data) => data.newPassword === data.confirmNewPassword, {
         message: "New password and confirm new password must match",
     });
+
+export const changeDataSchema = z.object({
+    name: z.string().min(3, "Name must be at least 3 characters long").optional(),
+    email: z.string().email("Invalid email address").optional(),
+    no_hp: z.string().min(10, "Phone number must be at least 10 characters long").optional(),
+    photoUrl: z.string().url("Invalid photo URL").optional()
+});
+

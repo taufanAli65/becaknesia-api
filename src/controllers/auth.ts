@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { validate } from "../utils/validate";
-import { activateUserService, registerService, resendVerificationEmailService, loginService } from "../services/auth";
+import { activateUserService, registerService, resendVerificationEmailService, loginService, updateUserService } from "../services/auth";
 import { sendFail, sendSuccess } from "../utils/senResponse";
-import { registerSchema, verifyEmailSchema, resendVerificationEmailSchema, loginSchema } from "../validators/auth";
+import { registerSchema, verifyEmailSchema, resendVerificationEmailSchema, loginSchema, changeDataSchema } from "../validators/auth";
 import { uploadProfilePhoto } from "../helpers/supabaseUpload";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -58,6 +58,21 @@ export const login = async(req: Request, res: Response, next: NextFunction): Pro
         const { email, password } = validate(loginSchema, req.body);
         const token = await loginService(email, password);
         return sendSuccess(res, 200, "Login successful", { "token": token });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+    }
+}
+
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user.id;
+        if (!userId) {
+            return sendFail(res, 401, "Unauthorized access");
+        }
+        const { name, email, no_hp, photoUrl } = validate(changeDataSchema, req.body);
+        await updateUserService(userId, { name, email, no_hp, photoUrl });
+        return sendSuccess(res, 200, "User updated successfully");
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         return sendFail(res, 400, errorMessage, error);

@@ -91,4 +91,38 @@ async function loginService(email: string, password: string): Promise<string> {
     return token;
 }
 
-export {registerService, activateUserService, resendVerificationEmailService, loginService};
+async function updateUserService(userId: string, updateData: Partial<{ name: string; email: string; no_hp: string; photoUrl: string }>): Promise<void> {
+    const user = await User.findById(userId);
+    if (!user) {
+        throw AppError("User not found", 404);
+    }
+    if (updateData.email && updateData.email !== user.email) {
+        const emailExists = await User.findOne({ email: updateData.email });
+        if (emailExists) {
+            throw AppError("Email already in use", 400);
+        }
+        user.email = updateData.email;
+        user.status = userStatus.Nonaktif;
+        
+        const verificationToken = generateVerificationToken(user);
+        await user.save();
+
+        // Send verification email
+        const verificationUrl = `${process.env.VERIFICATION_URL}/auth/activate?token=${verificationToken}`;
+        await sendEmail({
+        to: user.email,
+        subject: "Verifikasi Email Anda",
+        templateName: "verify_user",
+        context: {
+            name: user.name,
+            verification_url: verificationUrl
+        }
+        });
+    }
+    if (updateData.name) user.name = updateData.name;
+    if (updateData.no_hp) user.no_hp = updateData.no_hp;
+    if (updateData.photoUrl) user.photoUrl = updateData.photoUrl;
+    await user.save();
+}
+
+export {registerService, activateUserService, resendVerificationEmailService, loginService, updateUserService};
