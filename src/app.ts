@@ -6,6 +6,7 @@ import cors from "cors";
 
 import authRoutes from "./routes/auth";
 import adminRoutes from "./routes/admin"
+import tourRoutes from "./routes/tour";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cors()) // Allow all connection
 
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
+app.use("/tour", tourRoutes);
 
 connectDatabase().then(() => {
     app.listen(PORT, () => {
