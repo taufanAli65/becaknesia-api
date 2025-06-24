@@ -8,10 +8,10 @@ const supabase = createClient(
 
 const bucketName = process.env.SUPABASE_BUCKET_NAME as string;
 
-export async function uploadProfilePhoto(file: Express.Multer.File): Promise<string> {
+export async function uploadProfilePhoto(folder_name: string, file: Express.Multer.File): Promise<string> {
   if (!file) throw AppError("No file uploaded", 400);
 
-  const filePath = `profile_photos/${Date.now()}_${file.originalname}`;
+  const filePath = `${folder_name}/${Date.now()}_${file.originalname}`;
   const { error } = await supabase.storage
     .from(bucketName)
     .upload(filePath, file.buffer, {

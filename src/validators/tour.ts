@@ -11,7 +11,8 @@ export const createNewTourPackageSchema = z.object({
     duration: z.number(),
     distances: z.number(),
     routes: z.array(z.string()),
-    prices: z.number()
+    prices: z.number(),
+    photo_url: z.string().url("Photo URL must be a valid URL")
 });
 
 export const needTourIDSchema = z.object({

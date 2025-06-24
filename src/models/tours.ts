@@ -7,6 +7,7 @@ export interface ITour extends Document {
     distances: number,
     routes: Array<string>,
     prices: number,
+    photo_url: string,
     created_at: Date,
     update_at: Date
 }
@@ -17,7 +18,8 @@ const tourSchema = new Schema({
     duration: {type: Number, required: true},
     distances: {type: Number, required: true},
     routes: {type: Array, required: true},
-    prices: {type: Number, required: true}
+    prices: {type: Number, required: true},
+    photo_url: {type: String, required: true}
 }, {
     timestamps: {createdAt: "created_at", updatedAt: "update_at"}
 });

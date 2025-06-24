@@ -1,14 +1,15 @@
 import Tour from "../models/tours";
 import { AppError } from "../utils/appError";
 
-async function createNewTourPackageService(route_name: String, description: String, duration: Number, distances: Number, routes: Array<string>, prices: Number): Promise<void> {
+async function createNewTourPackageService(route_name: String, description: String, duration: Number, distances: Number, routes: Array<string>, prices: Number, photo_url: string): Promise<void> {
     const tour = new Tour({
         route_name,
         description,
         duration,
         distances,
         routes,
-        prices
+        prices,
+        photo_url
     })
     await tour.save();
 }

@@ -11,7 +11,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         let photoUrl = "";
 
         if (req.file) {
-            photoUrl = await uploadProfilePhoto(req.file);
+            photoUrl = await uploadProfilePhoto("profile_photos", req.file);
         } else {
             return sendFail(res, 400, "Photo is required");
         }

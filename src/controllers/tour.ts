@@ -3,11 +3,22 @@ import { createNewTourPackageService, getTourPackagesService, getTourPackageServ
 import { sendFail, sendSuccess } from "../utils/senResponse";
 import { validate } from "../utils/validate";
 import { createNewTourPackageSchema, needTourIDSchema, updateTourPackageSchema } from "../validators/tour";
+import { uploadProfilePhoto } from "../helpers/supabaseUpload";
 
 export const createNewTourPackage = async(req: Request, res: Response, next: NextFunction) => {
     try {
-        const {route_name, description, duration, distances, routes,prices} = validate(createNewTourPackageSchema, req.body);
-        await createNewTourPackageService(route_name, description, duration, distances, routes,prices);
+        let photo_url = "";
+        if (req.file) {
+            photo_url = await uploadProfilePhoto("tour", req.file);
+        } else {
+            return sendFail(res, 400, "Photo is required");
+        }
+        // Validate the rest of the fields except photo_url
+        const {route_name, description, duration, distances, routes, prices} = validate(
+            createNewTourPackageSchema.omit({ photo_url: true }),
+            req.body
+        );
+        await createNewTourPackageService(route_name, description, duration, distances, routes, prices, photo_url);
         return sendSuccess(res, 200, "New tour package is created successfully");
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
