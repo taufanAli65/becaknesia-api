@@ -3,7 +3,7 @@ import { validate } from "../utils/validate";
 import { activateUserService, registerService, resendVerificationEmailService, loginService, updateUserService } from "../services/auth";
 import { sendFail, sendSuccess } from "../utils/senResponse";
 import { registerSchema, verifyEmailSchema, resendVerificationEmailSchema, loginSchema, changeDataSchema } from "../validators/auth";
-import { uploadProfilePhoto } from "../helpers/supabaseUpload";
+import { uploadPhoto } from "../helpers/supabaseUpload";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -11,7 +11,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         let photoUrl = "";
 
         if (req.file) {
-            photoUrl = await uploadProfilePhoto("profile_photos", req.file);
+            photoUrl = await uploadPhoto("profile_photos", req.file);
         } else {
             return sendFail(res, 400, "Photo is required");
         }

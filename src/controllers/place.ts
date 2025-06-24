@@ -3,10 +3,21 @@ import { Request, Response, NextFunction } from "express";
 import { sendSuccess, sendFail } from "../utils/senResponse";
 import { validate } from "../utils/validate";
 import { createPlaceSchema, needPlaceIDSchema, updatePlaceSchema } from "../validators/place";
+import { uploadPhoto } from "../helpers/supabaseUpload";
 
 export const createPlace = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, coordinates, description, photo_url } = validate(createPlaceSchema, req.body);
+    let photo_url = "";
+    if (req.file) {
+        photo_url = await uploadPhoto("place", req.file);
+    } else {
+        return sendFail(res, 400, "Photo is required");
+    }
+    // Validate the rest of the fields except photo_url
+    const { name, coordinates, description, } = validate(
+        createPlaceSchema.omit({ photo_url: true }),
+        req.body
+    );
     await createPlaceService(name, coordinates, description, photo_url);
     return sendSuccess(res, 201, "Place created successfully");
   } catch (error) {

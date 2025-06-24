@@ -99,6 +99,7 @@ MAILGUN_DOMAIN=
 | distances    | Number   | Distance in kilometers       |
 | routes       | [String] | List of places/waypoints     |
 | prices       | Number   | Price of the tour            |
+| photo_url    | String   | Tour photo URL               |
 | created_at   | Date     |                              |
 | update_at    | Date     |                              |
 
@@ -133,7 +134,7 @@ MAILGUN_DOMAIN=
 | tour_id    | ObjectId       | Reference to Tour          |
 | times      | String         | Schedule time              |
 | available  | Boolean        | Is available?              |
-| user_id    | ObjectId       | Reference to User          |
+| driver_id  | ObjectId       | Reference to Driver        |
 | created_at | Date           |                            |
 | updated_at | Date           |                            |
 
@@ -172,7 +173,7 @@ MAILGUN_DOMAIN=
 
 - **POST `/tour/`**
   - Create a new tour package (admin only).
-  - Body: `route_name`, `description`, `duration`, `distances`, `routes`, `prices`
+  - Body: `route_name`, `description`, `duration`, `distances`, `routes`, `prices`, `photo` (multipart/form-data)
 - **GET `/tour/`**
   - Get all tour packages (admin only).
   - Query: `page`, `limit`
@@ -184,13 +185,35 @@ MAILGUN_DOMAIN=
 - **DELETE `/tour/:tourID`**
   - Delete a tour package (admin only).
 
+### Place
+
+- **POST `/place/`**
+  - Create a new place (admin only).
+  - Body: `name`, `coordinates`, `description`, `photo_url`
+- **GET `/place/`**
+  - Get all places.
+  - Query: `page`, `limit`
+- **GET `/place/:place_id`**
+  - Get a specific place by ID.
+- **PUT `/place/:place_id`**
+  - Update a place (admin only).
+  - Body: any of `name`, `coordinates`, `description`, `photo_url`
+- **DELETE `/place/:place_id`**
+  - Delete a place (admin only).
+
+### Driver
+
+- **POST `/driver/availability`**
+  - Add driver availabilities (driver only).
+  - Body: `driver_id`, `days`, `times`
+
 ---
 
 ## Notes
 
 - All endpoints (except `/auth/register` and `/auth/login`) require authentication via Bearer token.
 - Admin-only endpoints require the user to have the `admin` role.
-- File uploads (profile photo) use Supabase storage.
+- File uploads (profile photo, tour photo) use Supabase storage.
 - Email verification is required for account activation.
 
 ---

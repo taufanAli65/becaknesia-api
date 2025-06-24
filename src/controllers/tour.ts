@@ -3,13 +3,13 @@ import { createNewTourPackageService, getTourPackagesService, getTourPackageServ
 import { sendFail, sendSuccess } from "../utils/senResponse";
 import { validate } from "../utils/validate";
 import { createNewTourPackageSchema, needTourIDSchema, updateTourPackageSchema } from "../validators/tour";
-import { uploadProfilePhoto } from "../helpers/supabaseUpload";
+import { uploadPhoto } from "../helpers/supabaseUpload";
 
 export const createNewTourPackage = async(req: Request, res: Response, next: NextFunction) => {
     try {
         let photo_url = "";
         if (req.file) {
-            photo_url = await uploadProfilePhoto("tour", req.file);
+            photo_url = await uploadPhoto("tour", req.file);
         } else {
             return sendFail(res, 400, "Photo is required");
         }
