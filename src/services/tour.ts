@@ -29,7 +29,7 @@ async function getTourPackagesService(page: number = 1, limit: number = 10) {
 
 async function getTourPackageService(tourID:string) {
     if(!tourID) throw AppError("Tour ID is required", 400)
-    const tour = await Tour.findById({tourID});
+    const tour = await Tour.findById(tourID);
     if(!tour) throw AppError("No tour package with such ID", 404);
     return tour;
 }
