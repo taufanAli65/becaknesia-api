@@ -6,18 +6,28 @@ async function createPlaceService(name: string, coordinates: string, description
     await place.save();
 }
 
-async function getPlacesService(page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
-    const places = await Place.find().skip(skip).limit(limit);
-    const total = await Place.countDocuments();
-    return {
-        data: places,
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-    };
+async function getPlacesService(page: number = 1, limit: number = 10, search?: string) {
+  const skip = (page - 1) * limit;
+  const query: any = {};
+  if (search) {
+    query.$or = [
+      { name: { $regex: search, $options: "i" } }, // case-insensitive
+      { description: { $regex: search, $options: "i" } }
+    ];
+  }
+
+  const places = await Place.find(query).skip(skip).limit(limit);
+  const total = await Place.countDocuments(query);
+
+  return {
+    data: places,
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit)
+  };
 }
+
 
 async function getPlaceService(placeID: string) {
     if(!placeID) throw AppError("Place ID is required", 400);

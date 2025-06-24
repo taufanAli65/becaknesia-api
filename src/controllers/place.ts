@@ -30,14 +30,15 @@ export const getPlaces = async (req: Request, res: Response, next: NextFunction)
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-
-    const result = await getPlacesService(page, limit);
+    const search = (req.query.search as string) || "";
+    const result = await getPlacesService(page, limit, search);
     return sendSuccess(res, 200, "Places fetched successfully", result);
   } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        return sendFail(res, 400, errorMessage, error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
   }
 };
+
 
 export const getPlace = async (req: Request, res: Response, next: NextFunction) => {
   try {
