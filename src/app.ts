@@ -8,7 +8,8 @@ import authRoutes from "./routes/auth";
 import adminRoutes from "./routes/admin"
 import tourRoutes from "./routes/tour";
 import driverRoutes from "./routes/driver";
-import placeRoutes from "./routes/place"
+import placeRoutes from "./routes/place";
+import driverReviewRoutes from "./routes/driverReview";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use("/admin", adminRoutes);
 app.use("/tour", tourRoutes);
 app.use("/driver", driverRoutes);
 app.use("/place", placeRoutes);
+app.use("/review/driver", driverReviewRoutes);
 
 connectDatabase().then(() => {
     app.listen(PORT, () => {
