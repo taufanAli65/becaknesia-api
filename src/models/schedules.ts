@@ -4,7 +4,7 @@ export interface ISchedule extends Document {
     tour_id: Types.ObjectId,
     times: string,
     available: boolean,
-    user_id: Types.ObjectId,
+    driver_id: Types.ObjectId,
     created_at: Date,
     updated_at: Date
 }
@@ -17,7 +17,7 @@ const scheduleSchema = new Schema({
         default: false,
         required: true
     },
-    user_id: {type: Types.ObjectId, ref: "Users", required: true}
+    driver_id: {type: Types.ObjectId, ref: "Drivers", required: true}
 }, {
     timestamps: {createdAt: "created_at", updatedAt: "updated_at"}
 });
