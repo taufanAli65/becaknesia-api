@@ -14,17 +14,24 @@ async function createNewTourPackageService(route_name: String, description: Stri
     await tour.save();
 }
 
-async function getTourPackagesService(page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
-    const tours = await Tour.find().skip(skip).limit(limit);
-    const total = await Tour.countDocuments();
-    return {
-        data: tours,
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-    };
+async function getTourPackagesService(page: number = 1, limit: number = 10, search?: string) {
+  const skip = (page - 1) * limit;
+  const query: any = {};
+  if (search) {
+    query.$or = [
+      { route_name: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } }
+    ];
+  }
+  const tours = await Tour.find(query).skip(skip).limit(limit);
+  const total = await Tour.countDocuments(query);
+  return {
+    data: tours,
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit)
+  };
 }
 
 async function getTourPackageService(tourID:string) {

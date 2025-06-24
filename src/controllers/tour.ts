@@ -26,18 +26,19 @@ export const createNewTourPackage = async(req: Request, res: Response, next: Nex
     }
 }
 
-export const getAllTourPackages = async(req: Request, res: Response, next: NextFunction) => {
-    try {
-        const page = parseInt(req.query.page as string) || 1; // default = 1;
-        const limit = parseInt(req.query.limit as string) || 10 // default = 10;
-        
-        const result = await getTourPackagesService(page, limit);
-        return sendSuccess(res, 200, "Tour packages fetched successfully", result);
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        return sendFail(res, 400, errorMessage, error);
-    }
-}
+export const getAllTourPackages = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || "";
+
+    const result = await getTourPackagesService(page, limit, search);
+    return sendSuccess(res, 200, "Tour packages fetched successfully", result);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
 
 export const getTourPackage = async(req: Request, res: Response, next: NextFunction) => {
     try {
