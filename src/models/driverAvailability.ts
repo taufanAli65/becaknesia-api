@@ -27,14 +27,16 @@ export interface IDriverAvailability extends Document{
 const driverAvailabilitySchema = new Schema({
     driver_id: {type: Types.ObjectId, ref: "Drivers", required: true},
     days: {
-        type: Array,
+        type: [String],
         enum: Object.values(daysArray),
-        required: true
+        required: true,
+        validate: [(arr: string | any[]) => arr.length > 0, 'At least one day is required']
     },
     times: {
-        type: Array,
+        type: [String],
         enum: Object.values(timesArray),
-        required: true
+        required: true,
+        validate: [(arr: string | any[]) => arr.length > 0, 'At least one time is required']
     }
 }, {
     timestamps: {createdAt: "created_at", updatedAt: "updated_at"}
