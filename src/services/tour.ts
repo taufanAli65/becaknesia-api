@@ -34,7 +34,7 @@ async function getTourPackageService(tourID:string) {
     return tour;
 }
 
-async function updateTourPackageService(tourID:string, route_name?: String, description?: String, duration?: Number, distances?: Number, routes?: Array<string>, prices?: Number) {
+async function updateTourPackageService(tourID: string, route_name?: String, description?: String, duration?: Number, distances?: Number, routes?: Array<string>, prices?: Number, photo_url?: string | undefined) {
     if(!tourID) throw AppError("Tour ID is required", 400);
     const updateFields: any = {};
     if (route_name !== undefined) updateFields.route_name = route_name;
@@ -43,6 +43,7 @@ async function updateTourPackageService(tourID:string, route_name?: String, desc
     if (distances !== undefined) updateFields.distances = distances;
     if (routes !== undefined) updateFields.routes = routes;
     if (prices !== undefined) updateFields.prices = prices;
+    if (photo_url !== undefined) updateFields.photo_url = photo_url; 
     const updatedTour = await Tour.findByIdAndUpdate(
         tourID,
         { $set: updateFields },

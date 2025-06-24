@@ -53,15 +53,28 @@ export const getPlace = async (req: Request, res: Response, next: NextFunction) 
 export const updatePlace = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { place_id } = validate(needPlaceIDSchema, req.params);
-    const { name, coordinates, description, photo_url } = validate(updatePlaceSchema, req.body);
 
-    const updated = await updatePlaceService(place_id, name, coordinates, description, photo_url);
+    let photo_url: string | undefined = undefined;
+    if (req.file) {
+      photo_url = await uploadPhoto("place", req.file);
+    }
+    const { name, coordinates, description } = validate(
+      updatePlaceSchema.omit({ photo_url: true }),
+      req.body
+    );
+    const updated = await updatePlaceService(
+      place_id,
+      name,
+      coordinates,
+      description,
+      photo_url
+    );
     return sendSuccess(res, 200, "Place updated successfully", updated);
   } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        return sendFail(res, 400, errorMessage, error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
   }
-}
+};
 
 export const deletePlace = async (req: Request, res: Response, next: NextFunction) => {
   try {

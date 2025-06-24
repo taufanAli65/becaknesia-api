@@ -25,5 +25,6 @@ export const updateTourPackageSchema = z.object({
   duration: z.number().positive("Duration must be a positive number").optional(),
   distances: z.number().positive("Distance must be a positive number").optional(),
   routes: z.array(z.string()).optional(),
-  prices: z.number().positive("Price must be a positive number").optional()
+  prices: z.number().positive("Price must be a positive number").optional(),
+  photo_url: z.string().url("Photo URL must be a valid URL")
 });

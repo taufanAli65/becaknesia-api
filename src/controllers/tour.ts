@@ -50,15 +50,32 @@ export const getTourPackage = async(req: Request, res: Response, next: NextFunct
     }
 }
 
-export const updateTourPackage = async(req: Request, res: Response, next: NextFunction) => {
+export const updateTourPackage = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const {tourID} = validate(needTourIDSchema, req.params);
-    const {route_name, description, duration, distances, routes, prices} = validate(updateTourPackageSchema, req.body);
-    const updatedTour = await updateTourPackageService(tourID, route_name, description, duration, distances, routes, prices);
+    const { tourID } = validate(needTourIDSchema, req.params);
+    const { route_name, description, duration, distances, routes, prices } = validate(
+      updateTourPackageSchema.omit({ photo_url: true }),
+      req.body
+    );
+    let photo_url: string | undefined = undefined;
+    if (req.file) {
+      photo_url = await uploadPhoto("tour", req.file);
+    }
+    const updatedTour = await updateTourPackageService(
+      tourID,
+      route_name,
+      description,
+      duration,
+      distances,
+      routes,
+      prices,
+      photo_url // optional
+    );
+
     return sendSuccess(res, 200, "Tour package updated successfully", updatedTour);
   } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-        return sendFail(res, 400, errorMessage, error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
   }
 };
 
