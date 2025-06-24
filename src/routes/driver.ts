@@ -7,3 +7,5 @@ import { addAvailabilities } from "../controllers/driver";
 const router = Router();
 
 router.post("/available", authenticated, authorize(userRoles.Admin), (req: Request, res: Response, next: NextFunction) => {addAvailabilities(req, res, next)});
+
+export default router;
