@@ -1,50 +1,53 @@
 # Becaknesia API
 
-## Overview
+Becaknesia API is a backend service for managing a tourism platform focused on traditional "becak" (pedicab) tours. It provides endpoints for user authentication, tour packages, places, driver management, and admin operations.
 
-Becaknesia API is a backend service for managing a tour and ride-sharing platform focused on "becak" (traditional tricycles). It provides endpoints for user authentication, tour package management, driver assignment, order processing, and reviews. The API is built with Node.js, Express, MongoDB, and integrates with Supabase for file storage and email services for user verification.
+## Table of Contents
+
+- [About](#about)
+- [Requirements](#requirements)
+- [How to Run](#how-to-run)
+- [Models](#models)
+- [API Usage](#api-usage)
+
+---
+
+## About
+
+This API powers the Becaknesia platform, enabling users to register, book tours, review drivers and tours, and for admins to manage drivers, tours, and places. It uses Node.js, Express, MongoDB, and integrates with Supabase for file storage and Nodemailer for email verification.
 
 ---
 
 ## Requirements
 
 - Node.js (v16+ recommended)
+- npm or yarn
 - MongoDB instance (local or remote)
-- Supabase account (for file storage)
-- Email service credentials (Gmail, SendGrid, or Mailgun)
-- Environment variables configured (see below)
+- Supabase account (for file uploads)
+- Gmail or SMTP credentials (for email sending)
+- Environment variables set in a `.env` file (see below)
 
----
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
+### Example `.env` file
 
 ```
 PORT=3000
-MONGODB_URL=your_mongodb_connection_string
+MONGODB_URL=mongodb://localhost:27017/becaknesia
 JWT_SECRET=your_jwt_secret
 SALTROUNDS=10
 
 # Supabase
 SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-SUPABASE_BUCKET_NAME=your_supabase_bucket_name
+SUPABASE_BUCKET_NAME=your_bucket_name
 
 # Email
-EMAIL_USER=your_email_address
+EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_email_password
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=465
 EMAIL_SECURE=true
 
-# Verification URL
-VERIFICATION_URL=https://your-frontend-url.com
-
-# (Optional) SendGrid/Mailgun
-SENDGRID_API_KEY=
-MAILGUN_API_KEY=
-MAILGUN_DOMAIN=
+VERIFICATION_URL=http://localhost:3000
 ```
 
 ---
@@ -52,22 +55,24 @@ MAILGUN_DOMAIN=
 ## How to Run
 
 1. **Install dependencies:**
-   ```
+   ```bash
    npm install
+   # or
+   yarn install
    ```
 
-2. **Set up your `.env` file** as described above.
+2. **Set up your `.env` file** (see above).
 
-3. **Start the server:**
-   ```
+3. **Start MongoDB** (if running locally).
+
+4. **Run the server:**
+   ```bash
    npm run dev
-   ```
-   or
-   ```
-   npm start
+   # or
+   yarn dev
    ```
 
-4. The API will be available at `http://localhost:3000` (or your specified port).
+   The API will be available at `http://localhost:3000`.
 
 ---
 
@@ -75,73 +80,78 @@ MAILGUN_DOMAIN=
 
 ### User
 
-| Field                | Type     | Description                        |
-|----------------------|----------|------------------------------------|
-| name                 | String   | User's full name                   |
-| password             | String   | Hashed password                    |
-| email                | String   | Unique email address               |
-| no_hp                | String   | Phone number                       |
-| role                 | Enum     | `user`, `admin`, `driver`          |
-| status               | Enum     | `aktif`, `nonaktif`                |
-| photoUrl             | String   | Profile photo URL                  |
-| verificationToken    | String   | Email verification token           |
-| verificationTokenExpires | Date | Token expiration                   |
-| created_at           | Date     |                                    |
-| update_at            | Date     |                                    |
+| Field                   | Type     | Description                        |
+|-------------------------|----------|------------------------------------|
+| name                    | string   | User's name                        |
+| password                | string   | Hashed password                    |
+| email                   | string   | Unique email address               |
+| no_hp                   | string   | Phone number                       |
+| role                    | enum     | `user` \| `admin` \| `driver`      |
+| status                  | enum     | `aktif` \| `nonaktif`              |
+| photoUrl                | string   | Profile photo URL                  |
+| verificationToken       | string   | Email verification token           |
+| verificationTokenExpires| Date     | Token expiry date                  |
+| created_at              | Date     | Created timestamp                  |
+| update_at               | Date     | Updated timestamp                  |
 
 ### Tour
 
+| Field        | Type         | Description                  |
+|--------------|--------------|------------------------------|
+| route_name   | string       | Name of the tour route       |
+| description  | string       | Description of the tour      |
+| duration     | number       | Duration (minutes/hours)     |
+| distances    | number       | Distance (km)                |
+| routes       | string[]     | List of place IDs/names      |
+| prices       | number       | Price                        |
+| photo_url    | string       | Photo URL                    |
+| created_at   | Date         | Created timestamp            |
+| update_at    | Date         | Updated timestamp            |
+
+### Place
+
 | Field        | Type     | Description                  |
 |--------------|----------|------------------------------|
-| route_name   | String   | Name of the tour route       |
-| description  | String   | Description of the tour      |
-| duration     | Number   | Duration in minutes/hours    |
-| distances    | Number   | Distance in kilometers       |
-| routes       | [String] | List of places/waypoints     |
-| prices       | Number   | Price of the tour            |
-| photo_url    | String   | Tour photo URL               |
-| created_at   | Date     |                              |
-| update_at    | Date     |                              |
+| name         | string   | Place name                   |
+| coordinates  | string   | Latitude,Longitude           |
+| description  | string   | Description                  |
+| photo_url    | string   | Photo URL                    |
+| created_at   | Date     | Created timestamp            |
+| updated_at   | Date     | Updated timestamp            |
 
 ### Driver
 
-| Field      | Type           | Description                |
-|------------|----------------|----------------------------|
-| user_id    | ObjectId       | Reference to User          |
-| status     | Enum           | `active`, `suspend`        |
-| created_at | Date           |                            |
-| update_at  | Date           |                            |
+| Field        | Type         | Description                  |
+|--------------|--------------|------------------------------|
+| user_id      | ObjectId     | Reference to User            |
+| status       | enum         | `active` \| `suspend`        |
+| created_at   | Date         | Created timestamp            |
+| update_at    | Date         | Updated timestamp            |
+
+### Driver Availability
+
+| Field        | Type         | Description                  |
+|--------------|--------------|------------------------------|
+| driver_id    | ObjectId     | Reference to Driver          |
+| days         | string[]     | Days available (`monday` ... `sunday`) |
+| times        | string[]     | Time slots (`08.00 - 10.00`, etc.)     |
+| created_at   | Date         | Created timestamp            |
+| updated_at   | Date         | Updated timestamp            |
 
 ### Order
 
-| Field           | Type           | Description                |
-|-----------------|----------------|----------------------------|
-| user_id         | ObjectId       | Reference to User          |
-| tour_id         | ObjectId       | Reference to Tour          |
-| payment_method  | Enum           | `cash`, `qris`             |
-| order_status    | Enum           | `waiting`, `Accepted`, `done`, `Canceled` |
-| total           | Number         | Total price                |
-| payment_status  | Enum           | `failed`, `success`, `pending` |
-| pickup_location | String         | Pickup location            |
-| pickup_time     | String         | Pickup time                |
-| created_at      | Date           |                            |
-| update_at       | Date           |                            |
-
-### Schedule
-
-| Field      | Type           | Description                |
-|------------|----------------|----------------------------|
-| tour_id    | ObjectId       | Reference to Tour          |
-| times      | String         | Schedule time              |
-| available  | Boolean        | Is available?              |
-| driver_id  | ObjectId       | Reference to Driver        |
-| created_at | Date           |                            |
-| updated_at | Date           |                            |
-
-### Reviews
-
-- **TourReview:** user_id, tour_id, stars, comment, created_at, updated_at
-- **DriverReview:** user_id, driver_id, stars, comment, created_at, updated_at
+| Field           | Type         | Description                  |
+|-----------------|--------------|------------------------------|
+| user_id         | ObjectId     | Reference to User            |
+| tour_id         | ObjectId     | Reference to Tour            |
+| payment_method  | enum         | `cash` \| `qris`             |
+| order_status    | enum         | `waiting` \| `accepted` \| `done` \| `canceled` |
+| total           | number       | Total price                  |
+| payment_status  | enum         | `pending` \| `success` \| `failed` |
+| pickup_location | string       | Pickup location              |
+| pickup_time     | string       | Pickup time                  |
+| created_at      | Date         | Created timestamp            |
+| update_at       | Date         | Updated timestamp            |
 
 ---
 
@@ -211,14 +221,11 @@ MAILGUN_DOMAIN=
 
 ## Notes
 
-- All endpoints (except `/auth/register` and `/auth/login`) require authentication via Bearer token.
-- Admin-only endpoints require the user to have the `admin` role.
-- File uploads (profile photo, tour photo) use Supabase storage.
+- All protected routes require a valid JWT in the `Authorization: Bearer <token>` header.
+- Admin and driver routes require appropriate roles.
+- File uploads (photos) use Supabase Storage.
 - Email verification is required for account activation.
 
 ---
 
-## License
-
-MIT
-
+For further details, see the code and inline documentation.
