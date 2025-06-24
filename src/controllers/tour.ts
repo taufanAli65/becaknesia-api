@@ -15,7 +15,7 @@ export const createNewTourPackage = async(req: Request, res: Response, next: Nex
     }
 }
 
-export const getTourPackages = async(req: Request, res: Response, next: NextFunction) => {
+export const getAllTourPackages = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const page = parseInt(req.query.page as string) || 1; // default = 1;
         const limit = parseInt(req.query.limit as string) || 10 // default = 10;
@@ -39,7 +39,7 @@ export const getTourPackage = async(req: Request, res: Response, next: NextFunct
     }
 }
 
-export const updateTourPackageController = async(req: Request, res: Response, next: NextFunction) => {
+export const updateTourPackage = async(req: Request, res: Response, next: NextFunction) => {
   try {
     const {tourID} = validate(needTourIDSchema, req.params);
     const {route_name, description, duration, distances, routes, prices} = validate(updateTourPackageSchema, req.body);
