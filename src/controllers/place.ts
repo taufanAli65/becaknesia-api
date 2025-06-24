@@ -1,0 +1,65 @@
+import {createPlaceService, getPlacesService, getPlaceService, updatePlaceService, deletePlaceService} from "../services/place";
+import { Request, Response, NextFunction } from "express";
+import { sendSuccess, sendFail } from "../utils/senResponse";
+import { validate } from "../utils/validate";
+import { createPlaceSchema, needPlaceIDSchema, updatePlaceSchema } from "../validators/place";
+
+export const createPlace = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { name, coordinates, description, photo_url } = validate(createPlaceSchema, req.body);
+    await createPlaceService(name, coordinates, description, photo_url);
+    return sendSuccess(res, 201, "Place created successfully");
+  } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const getPlaces = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const result = await getPlacesService(page, limit);
+    return sendSuccess(res, 200, "Places fetched successfully", result);
+  } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const getPlace = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { place_id } = validate(needPlaceIDSchema, req.params);
+    const place = await getPlaceService(place_id);
+    return sendSuccess(res, 200, `Place with ID: ${place_id} is fetched successfully`, place);
+  } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const updatePlace = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { place_id } = validate(needPlaceIDSchema, req.params);
+    const { name, coordinates, description, photo_url } = validate(updatePlaceSchema, req.body);
+
+    const updated = await updatePlaceService(place_id, name, coordinates, description, photo_url);
+    return sendSuccess(res, 200, "Place updated successfully", updated);
+  } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+  }
+}
+
+export const deletePlace = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { place_id } = validate(needPlaceIDSchema, req.params);
+
+    await deletePlaceService(place_id);
+    return sendSuccess(res, 200, "Place deleted successfully");
+  } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+  }
+}

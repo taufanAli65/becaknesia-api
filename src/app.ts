@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth";
 import adminRoutes from "./routes/admin"
 import tourRoutes from "./routes/tour";
 import driverRoutes from "./routes/driver";
+import placeRoutes from "./routes/place"
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/tour", tourRoutes);
 app.use("/driver", driverRoutes);
+app.use("/place", placeRoutes);
 
 connectDatabase().then(() => {
     app.listen(PORT, () => {
