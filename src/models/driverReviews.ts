@@ -13,7 +13,7 @@ export interface IDriverReview {
 const driverReviewSchema = new Schema({
     user_id: {type: Types.ObjectId, ref: "Users", required: true},
     driver_id: {type: Types.ObjectId, ref: "Drivers", required: true},
-    order_id: {type: Types.ObjectId, ref: "Orders", required: true}, // changed from tour_id
+    order_id: {type: Types.ObjectId, ref: "Orders", required: true},
     stars: {type: Number, required: true},
     comment: {type: String, required: true}
 }, {
