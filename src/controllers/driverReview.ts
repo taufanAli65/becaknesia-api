@@ -23,7 +23,8 @@ export const getReviews = async (req: Request, res: Response, next: NextFunction
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    const result = await getReviewsService(page, limit);
+    const search = (req.query.search as string) || "";
+    const result = await getReviewsService(page, limit, search);
     return sendSuccess(res, 200, "Reviews fetched successfully", result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error occurred";

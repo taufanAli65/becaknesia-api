@@ -9,10 +9,16 @@ async function addReviewService(user_id: string, driver_id: string, stars: numbe
     await review.save();
 }
 
-async function getReviewsService(page: number = 1, limit: number = 10) {
+async function getReviewsService(page: number = 1, limit: number = 10, search?: string) {
     const skip = (page - 1) * limit;
-    const reviews = await driverReview.find().skip(skip).limit(limit);
-    const total = await driverReview.countDocuments();
+    const query: any = {};
+    if (search) {
+        query.$or = [
+        { driver_id: { $regex: search, $options: "i" } } // case-insensitive
+        ];
+    }
+    const reviews = await driverReview.find(query).skip(skip).limit(limit);
+    const total = await driverReview.countDocuments(query);
     return {
         data: reviews,
         page,
