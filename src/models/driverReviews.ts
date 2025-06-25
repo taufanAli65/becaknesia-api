@@ -3,7 +3,7 @@ import { Schema, model, Types } from "mongoose";
 export interface IDriverReview {
     user_id: Types.ObjectId,
     driver_id: Types.ObjectId,
-    tour_id: Types.ObjectId, // added
+    order_id: Types.ObjectId,
     stars: number,
     comment: string,
     created_at: Date,
@@ -11,9 +11,9 @@ export interface IDriverReview {
 }
 
 const driverReviewSchema = new Schema({
-    user_id: {type: Types.ObjectId, ref: "Users", required: true}, // The one who's write the review
-    driver_id: {type: Types.ObjectId, ref: "Drivers", required: true}, // The one who's getting reviewed
-    tour_id: {type: Types.ObjectId, ref: "Tours", required: true}, // added
+    user_id: {type: Types.ObjectId, ref: "Users", required: true},
+    driver_id: {type: Types.ObjectId, ref: "Drivers", required: true},
+    order_id: {type: Types.ObjectId, ref: "Orders", required: true}, // changed from tour_id
     stars: {type: Number, required: true},
     comment: {type: String, required: true}
 }, {
