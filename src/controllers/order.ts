@@ -1,0 +1,64 @@
+import { Request, Response, NextFunction } from "express";
+import { createOrderService, getOrdersService, getOrderService, updateOrderService, deleteOrderService } from "../services/order";
+import { sendSuccess, sendFail } from "../utils/senResponse";
+import { validate } from "../utils/validate";
+import { createOrderSchema, updateOrderSchema, needOrderIDSchema } from "../validators/order";
+
+export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user_id = req.user.id;
+    const { tour_id, payment_method, total, pickup_location, pickup_time } = validate(createOrderSchema, req.body);
+    const order = await createOrderService(user_id, tour_id, payment_method, total, pickup_location, pickup_time);
+    return sendSuccess(res, 201, "Order created successfully", order);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const user_id = req.user?.id;
+    const result = await getOrdersService(page, limit, user_id);
+    return sendSuccess(res, 200, "Orders fetched successfully", result);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const getOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { order_id } = validate(needOrderIDSchema, req.params);
+    const order = await getOrderService(order_id);
+    return sendSuccess(res, 200, "Order fetched successfully", order);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const updateOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { order_id } = validate(needOrderIDSchema, req.params);
+    const updateData = validate(updateOrderSchema, req.body);
+    const updatedOrder = await updateOrderService(order_id, updateData);
+    return sendSuccess(res, 200, "Order updated successfully", updatedOrder);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const deleteOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { order_id } = validate(needOrderIDSchema, req.params);
+    await deleteOrderService(order_id);
+    return sendSuccess(res, 200, "Order deleted successfully");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};

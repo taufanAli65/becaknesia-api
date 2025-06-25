@@ -1,0 +1,26 @@
+import mongoose from "mongoose";
+import { z } from "zod";
+import { orderStatus, paymentStatus, paymentMethod } from "../models/orders";
+
+const objectIdSchema = z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+  message: "Invalid ID, check again",
+});
+
+export const createOrderSchema = z.object({
+  tour_id: objectIdSchema,
+  payment_method: z.nativeEnum(paymentMethod),
+  total: z.string().min(1, "Total is required"),
+  pickup_location: z.string().min(1, "Pickup location is required"),
+  pickup_time: z.string().min(1, "Pickup time is required"),
+});
+
+export const updateOrderSchema = z.object({
+  order_status: z.nativeEnum(orderStatus).optional(),
+  payment_status: z.nativeEnum(paymentStatus).optional(),
+  pickup_location: z.string().optional(),
+  pickup_time: z.string().optional(),
+});
+
+export const needOrderIDSchema = z.object({
+  order_id: objectIdSchema,
+});
