@@ -1,7 +1,7 @@
 import { Schema, model, Types } from "mongoose";
 
 export interface ISchedule extends Document {
-    tour_id: Types.ObjectId,
+    order_id: Types.ObjectId,
     times: string,
     available: boolean,
     driver_id: Types.ObjectId,
@@ -10,7 +10,7 @@ export interface ISchedule extends Document {
 }
 
 const scheduleSchema = new Schema({
-    tour_id: { type: Types.ObjectId, ref: "Tours", required: true},
+    order_id: { type: Types.ObjectId, ref: "Orders", required: true},
     times: {type: String, required: true},
     available: {
         type: Boolean,

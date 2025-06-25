@@ -12,6 +12,7 @@ import placeRoutes from "./routes/place";
 import driverReviewRoutes from "./routes/driverReview";
 import tourReviewRoutes from "./routes/tourReview";
 import orderRoutes from "./routes/order";
+import scheduleRoutes from "./routes/schedule";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/place", placeRoutes);
 app.use("/review/driver", driverReviewRoutes);
 app.use("/review/tour", tourReviewRoutes);
 app.use("/order", orderRoutes);
+app.use("/schedule", scheduleRoutes);
 
 connectDatabase().then(() => {
     app.listen(PORT, () => {
