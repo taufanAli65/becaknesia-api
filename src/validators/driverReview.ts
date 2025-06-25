@@ -7,6 +7,7 @@ const objectIdSchema = z.string().refine((val) => mongoose.Types.ObjectId.isVali
 
 export const addReviewSchema = z.object({
     driver_id: objectIdSchema,
+    tour_id: objectIdSchema,
     stars: z.number().min(1, "Input stars range start from 1-5").max(5, "Input stars range start from 1-5"),
     comment: z.string().optional()
 })

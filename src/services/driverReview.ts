@@ -1,11 +1,12 @@
 import driverReview from "../models/driverReviews";
 import { AppError } from "../utils/appError";
 
-async function addReviewService(user_id: string, driver_id: string, stars: number, comment?: string) {
+async function addReviewService(user_id: string, driver_id: string, tour_id: string, stars: number, comment?: string) {
     if (!user_id) throw AppError("User ID is required", 400);
     if (!driver_id) throw AppError("Driver ID is required", 400);
+    if (!tour_id) throw AppError("Tour ID is required", 400);
     if (stars > 5 || stars <= 0) throw AppError("Input stars range start from 1-5", 400);
-    const review = new driverReview({ user_id, driver_id, stars, comment });
+    const review = new driverReview({ user_id, driver_id, tour_id, stars, comment });
     await review.save();
 }
 
@@ -14,7 +15,8 @@ async function getReviewsService(page: number = 1, limit: number = 10, search?: 
     const query: any = {};
     if (search) {
         query.$or = [
-        { driver_id: { $regex: search, $options: "i" } } // case-insensitive
+        { driver_id: { $regex: search, $options: "i" } }, // case-insensitive
+        { tour_id: { $regex: search, $options: "i" } }
         ];
     }
     const reviews = await driverReview.find(query).skip(skip).limit(limit);

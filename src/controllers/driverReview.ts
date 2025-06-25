@@ -9,10 +9,11 @@ import { AppError } from "../utils/appError";
 export const addReview = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const user_id = req.user.id;
-        const {driver_id, stars, comment} = validate(addReviewSchema, req.body);
+        const {driver_id, tour_id, stars, comment} = validate(addReviewSchema, req.body);
         const driver = Driver.findById(driver_id);
         if(!driver) throw AppError("There is no driver with such ID", 404);
-        await addReviewService(user_id, driver_id, stars, comment);
+        await addReviewService(user_id, driver_id, tour_id, stars, comment);
+        return sendSuccess(res, 201, "Review added successfully");
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         return sendFail(res, 400, errorMessage, error);
