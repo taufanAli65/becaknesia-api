@@ -20,8 +20,8 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    const user_id = req.user?.id;
-    const result = await getOrdersService(page, limit, user_id);
+    const search = (req.query.search as string) || "";
+    const result = await getOrdersService(page, limit, search);
     return sendSuccess(res, 200, "Orders fetched successfully", result);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";

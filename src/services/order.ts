@@ -7,10 +7,16 @@ async function createOrderService(user_id: string, tour_id: string, payment_meth
   return order;
 }
 
-async function getOrdersService(page: number = 1, limit: number = 10, user_id?: string) {
+async function getOrdersService(page: number = 1, limit: number = 10, search?: string) {
   const skip = (page - 1) * limit;
   const query: any = {};
-  if (user_id) query.user_id = user_id;
+  if (search) {
+        query.$or = [
+        { user_id: { $regex: search, $options: "i" } }, // case-insensitive
+        { order_status: { $regex: search, $options: "i" } },
+        { payment_status: { $regex: search, $options: "i" } }
+        ];
+    }
   const orders = await Order.find(query).skip(skip).limit(limit);
   const total = await Order.countDocuments(query);
   return {
