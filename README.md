@@ -1,346 +1,665 @@
 # Becaknesia API Documentation
 
-## Prerequisites
-
-- Node.js (v18+ recommended)
-- npm or yarn
-- MongoDB instance (local or remote)
-- Supabase account (for file storage)
-- Email provider credentials (for verification emails)
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```
-PORT=3000
-MONGODB_URL=mongodb://localhost:27017/becaknesia
-JWT_SECRET=your_jwt_secret
-SALTROUNDS=10
-
-# Supabase
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-SUPABASE_BUCKET_NAME=your_bucket_name
-
-# Email
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_email_password
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=465
-EMAIL_SECURE=true
-
-# Verification URL (for email links)
-VERIFICATION_URL=http://localhost:3000
-
-# (Optional) SendGrid/Mailgun configs if used
-SENDGRID_API_KEY=
-MAILGUN_API_KEY=
-MAILGUN_DOMAIN=
-DEFAULT_FROM_EMAIL=
-DEFAULT_FROM_NAME=
-```
-
-## How to Run
-
-1. **Install dependencies:**
-   ```
-   npm install
-   ```
-   or
-   ```
-   yarn install
-   ```
-
-2. **Start MongoDB** (if running locally).
-
-3. **Run the API in development mode:**
-   ```
-   npm run dev
-   ```
-   or
-   ```
-   yarn dev
-   ```
-
-   **Or run in production mode:**
-   ```
-   npm start
-   ```
-
-4. The API will be available at `http://localhost:3000` (or your configured port).
-
----
-
-## Overview
-
-This API powers the Becaknesia platform, enabling users to register, book tours, review drivers and tours, and for admins to manage drivers, tours, and places. It uses Node.js, Express, MongoDB, and integrates with Supabase for file storage and Nodemailer for email verification.
-This documentation covers all available endpoints, required request parameters, authentication, and response formats.
-
----
-
-## Table of Contents
-
-- [Authentication](#authentication)
-- [Models](#models)
-- [Endpoints](#endpoints)
-  - [Auth](#auth)
-  - [Admin](#admin)
-  - [Tour](#tour)
-  - [Place](#place)
-  - [Order](#order)
-  - [Schedule](#schedule)
-  - [Driver](#driver)
-  - [Reviews](#reviews)
-- [API Response Format](#api-response-format)
-
----
-
 ## Authentication
 
-- Most endpoints require a Bearer JWT token in the `Authorization` header.
-- Admin and driver endpoints require specific roles.
-- Obtain a token via `/auth/login`.
-
-**Header Example:**
-```
-Authorization: Bearer <your-jwt-token>
-```
-
----
-
-## Models
-
-### Users
-
-| Field                | Type     | Required | Description                |
-|----------------------|----------|----------|----------------------------|
-| _id                  | ObjectId | Yes      | User ID                    |
-| name                 | String   | Yes      | User's name                |
-| password             | String   | Yes      | Hashed password            |
-| email                | String   | Yes      | Unique email address       |
-| no_hp                | String   | Yes      | Phone number               |
-| role                 | Enum     | Yes      | user, admin, driver        |
-| status               | Enum     | Yes      | aktif, nonaktif            |
-| photoUrl             | String   | Yes      | Profile photo URL          |
-| verificationToken    | String   | No       | Email verification token   |
-| verificationTokenExpires | Date | No       | Token expiry               |
-| created_at           | Date     | Yes      | Creation timestamp         |
-| update_at            | Date     | Yes      | Last update timestamp      |
-
-### Tours
-
-| Field        | Type     | Required | Description           |
-|--------------|----------|----------|-----------------------|
-| _id          | ObjectId | Yes      | Tour ID               |
-| route_name   | String   | Yes      | Name of the route     |
-| description  | String   | Yes      | Description           |
-| duration     | Number   | Yes      | Duration in hours     |
-| distances    | Number   | Yes      | Distance in km        |
-| routes       | [String] | Yes      | List of places        |
-| prices       | Number   | Yes      | Price                 |
-| photo_url    | String   | Yes      | Photo URL             |
-| created_at   | Date     | Yes      | Creation timestamp    |
-| update_at    | Date     | Yes      | Last update timestamp |
-
-### Places
-
-| Field        | Type     | Required | Description           |
-|--------------|----------|----------|-----------------------|
-| _id          | ObjectId | Yes      | Place ID              |
-| name         | String   | Yes      | Place name            |
-| coordinates  | String   | Yes      | Coordinates           |
-| description  | String   | Yes      | Description           |
-| photo_url    | String   | Yes      | Photo URL             |
-| created_at   | Date     | Yes      | Creation timestamp    |
-| update_at    | Date     | Yes      | Last update timestamp |
-
-### Orders
-
-| Field          | Type     | Required | Description           |
-|----------------|----------|----------|-----------------------|
-| _id            | ObjectId | Yes      | Order ID              |
-| user_id        | ObjectId | Yes      | User reference        |
-| tour_id        | ObjectId | Yes      | Tour reference        |
-| payment_method | Enum     | Yes      | cash, qris            |
-| order_status   | Enum     | Yes      | waiting, accepted, done, canceled |
-| total          | String   | Yes      | Total price           |
-| payment_status | Enum     | Yes      | failed, success, pending |
-| pickup_location| String   | Yes      | Pickup location       |
-| pickup_time    | String   | Yes      | Pickup time           |
-| created_at     | Date     | Yes      | Creation timestamp    |
-| update_at      | Date     | Yes      | Last update timestamp |
-
-### Schedules
-
-| Field        | Type     | Required | Description           |
-|--------------|----------|----------|-----------------------|
-| _id          | ObjectId | Yes      | Schedule ID           |
-| order_id     | ObjectId | Yes      | Order reference       |
-| driver_id    | ObjectId | Yes      | Driver reference      |
-| times        | String   | Yes      | Time slot             |
-| available    | Boolean  | Yes      | Is available          |
-| created_at   | Date     | Yes      | Creation timestamp    |
-| update_at    | Date     | Yes      | Last update timestamp |
-
-### Driver Reviews
-
-| Field        | Type     | Required | Description           |
-|--------------|----------|----------|-----------------------|
-| _id          | ObjectId | Yes      | Review ID             |
-| user_id      | ObjectId | Yes      | User reference        |
-| driver_id    | ObjectId | Yes      | Driver reference      |
-| order_id     | ObjectId | Yes      | Order reference       |
-| stars        | Number   | Yes      | 1-5 rating            |
-| comment      | String   | Yes      | Review comment        |
-| created_at   | Date     | Yes      | Creation timestamp    |
-| updated_at   | Date     | Yes      | Last update timestamp |
-
-### Tour Reviews
-
-| Field        | Type     | Required | Description           |
-|--------------|----------|----------|-----------------------|
-| _id          | ObjectId | Yes      | Review ID             |
-| user_id      | ObjectId | Yes      | User reference        |
-| tour_id      | ObjectId | Yes      | Tour reference        |
-| stars        | Number   | Yes      | 1-5 rating            |
-| comment      | String   | Yes      | Review comment        |
-| created_at   | Date     | Yes      | Creation timestamp    |
-| updated_at   | Date     | Yes      | Last update timestamp |
-
----
-
-## Endpoints
-
-### Auth
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/auth/register`           | Register new user          | No           | name, password, email, no_hp, photo (file) |
-| POST   | `/auth/login`              | Login and get JWT token    | No           | email, password                   |
-| GET    | `/auth/activate`           | Activate user via token    | No           | token (query param)               |
-| POST   | `/auth/resend-verification-email` | Resend verification email | No           | email                             |
-| PUT    | `/auth/update`             | Update user profile        | Yes          | name, email, no_hp, photoUrl      |
-
-### Admin
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/admin/assign-driver`     | Assign user as driver      | Admin        | id (user id)                      |
-
-### Tour
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/tour/`                   | Create new tour package    | Admin        | route_name, description, duration, distances, routes, prices, photo (file) |
-| GET    | `/tour/`                   | Get all tour packages      | No           | page, limit, search (query)       |
-| GET    | `/tour/:tourID`            | Get tour package by ID     | No           | tourID (param)                    |
-| PUT    | `/tour/:tourID`            | Update tour package        | Admin        | fields to update, photo (file)    |
-| DELETE | `/tour/:tourID`            | Delete tour package        | Admin        | tourID (param)                    |
-
-### Place
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/place/`                  | Create new place           | Admin        | name, coordinates, description, photo (file) |
-| GET    | `/place/`                  | Get all places             | No           | page, limit, search (query)       |
-| GET    | `/place/:place_id`         | Get place by ID            | No           | place_id (param)                  |
-| PUT    | `/place/:place_id`         | Update place               | Admin        | fields to update, photo (file)    |
-| DELETE | `/place/:place_id`         | Delete place               | Admin        | place_id (param)                  |
-
-### Order
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/order/`                  | Create new order           | User         | tour_id, payment_method, total, pickup_location, pickup_time |
-| GET    | `/order/`                  | Get all orders             | User         | page, limit, search (query)       |
-| GET    | `/order/:order_id`         | Get order by ID            | User         | order_id (param)                  |
-| PUT    | `/order/:order_id`         | Update order               | User         | fields to update                  |
-| DELETE | `/order/:order_id`         | Delete order               | User         | order_id (param)                  |
-
-### Schedule
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/schedule/`               | Create schedule            | Admin        | order_id, driver_id, times, available |
-| GET    | `/schedule/`               | Get all schedules          | Admin        | page, limit, week (query)         |
-| GET    | `/schedule/:schedule_id`   | Get schedule by ID         | Admin        | schedule_id (param)               |
-| PUT    | `/schedule/:schedule_id`   | Update schedule            | Admin        | fields to update                  |
-| DELETE | `/schedule/:schedule_id`   | Delete schedule            | Admin        | schedule_id (param)               |
-
-### Driver
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/driver/availability`     | Add driver availabilities  | Driver       | driver_id, days, times            |
-
-### Reviews
-
-#### Driver Reviews
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/review/driver/`          | Add driver review          | User         | driver_id, order_id, stars, comment |
-| GET    | `/review/driver/`          | Get all driver reviews     | No           | page, limit, search (query)       |
-| GET    | `/review/driver/:review_id`| Get driver review by ID    | No           | review_id (param)                 |
-| PUT    | `/review/driver/:review_id`| Update driver review       | User         | stars, comment                    |
-| DELETE | `/review/driver/:review_id`| Delete driver review       | User         | review_id (param)                 |
-
-#### Tour Reviews
-
-| Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
-|--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/review/tour/`            | Add tour review            | User         | tour_id, stars, comment           |
-| GET    | `/review/tour/`            | Get all tour reviews       | No           | page, limit, search (query)       |
-| GET    | `/review/tour/:review_id`  | Get tour review by ID      | No           | review_id (param)                 |
-| PUT    | `/review/tour/:review_id`  | Update tour review         | User         | stars, comment                    |
-| DELETE | `/review/tour/:review_id`  | Delete tour review         | User         | review_id (param)                 |
-
----
-
-## API Response Format
-
-All responses follow this structure:
-
+### Register
+**POST** `/auth/register`  
+Form-data (with photo upload):
 ```json
 {
-  "status": "success" | "fail",
-  "message": "Description of the result",
-  "data": { ... } // or null
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "no_hp": "08123456789",
+  "photo": (file)
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Registration successful. Please check your email to verify your account.",
+  "data": null
 }
 ```
 
-### Example Success
+### Activate User
+**GET** `/auth/activate?token=...`  
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "User activated successfully. You can now log in.",
+  "data": null
+}
+```
 
+### Resend Verification Email
+**POST** `/auth/resend-verification-email`
+```json
+{
+  "email": "john@example.com"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Verification email sent successfully. Please check your inbox.",
+  "data": null
+}
+```
+
+### Login
+**POST** `/auth/login`
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Login successful",
+  "data": {
+    "token": "jwt_token_here",
+    "user": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "no_hp": "08123456789",
+      "role": "User",
+      "photoUrl": "https://..."
+    }
+  }
+}
+```
+
+### Update User
+**PUT** `/auth/update`  
+Headers: `Authorization: Bearer <token>`
+```json
+{
+  "name": "John Updated",
+  "email": "john2@example.com",
+  "no_hp": "08123456780",
+  "photoUrl": "https://..."
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "User updated successfully",
+  "data": null
+}
+```
+
+---
+
+## Places
+
+### Create Place
+**POST** `/place/`  
+Headers: `Authorization: Bearer <admin_token>`  
+Form-data (with photo upload):
+```json
+{
+  "name": "Borobudur",
+  "coordinates": "-7.6079,110.2038",
+  "description": "Candi Borobudur",
+  "photo": (file)
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Place created successfully",
+  "data": null
+}
+```
+
+### Get Places
+**GET** `/place/?page=1&limit=10&search=borobudur`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Places fetched successfully",
+  "data": {
+    "data": [ /* array of places */ ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+### Get Place by ID
+**GET** `/place/:place_id`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Place with ID: ... is fetched successfully",
+  "data": { /* place object */ }
+}
+```
+
+### Update Place
+**PUT** `/place/:place_id`  
+Headers: `Authorization: Bearer <admin_token>`
+```json
+{
+  "name": "Borobudur Updated",
+  "coordinates": "-7.6079,110.2038",
+  "description": "Candi Borobudur Updated",
+  "photoUrl": "https://..."
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Place updated successfully",
+  "data": { /* updated place object */ }
+}
+```
+
+### Delete Place
+**DELETE** `/place/:place_id`  
+Headers: `Authorization: Bearer <admin_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Place deleted successfully",
+  "data": null
+}
+```
+
+---
+
+## Tours
+
+### Create Tour Package
+**POST** `/tour/`  
+Headers: `Authorization: Bearer <admin_token>`  
+Form-data (with photo upload):
+```json
+{
+  "route_name": "Tour Borobudur",
+  "description": "Wisata ke Borobudur",
+  "duration": 2,
+  "distances": 10,
+  "routes": ["Borobudur", "Mendut"],
+  "prices": 100000,
+  "photo": (file)
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "New tour package is created successfully",
+  "data": null
+}
+```
+
+### Get All Tour Packages
+**GET** `/tour/?page=1&limit=10&search=borobudur`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Tour packages fetched successfully",
+  "data": {
+    "data": [ /* array of tours */ ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+### Get Tour Package by ID
+**GET** `/tour/:tourID`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Tour package with ID: ... fetched successfully",
+  "data": { /* tour object */ }
+}
+```
+
+### Update Tour Package
+**PUT** `/tour/:tourID`  
+Headers: `Authorization: Bearer <admin_token>`
+```json
+{
+  "route_name": "Tour Borobudur Updated",
+  "description": "Wisata ke Borobudur Updated",
+  "duration": 3,
+  "distances": 12,
+  "routes": ["Borobudur", "Mendut", "Pawon"],
+  "prices": 120000,
+  "photoUrl": "https://..."
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Tour package updated successfully",
+  "data": { /* updated tour object */ }
+}
+```
+
+### Delete Tour Package
+**DELETE** `/tour/:tourID`  
+Headers: `Authorization: Bearer <admin_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Tour package deleted successfully",
+  "data": { /* deleted tour object */ }
+}
+```
+
+---
+
+## Orders
+
+### Create Order
+**POST** `/order/`  
+Headers: `Authorization: Bearer <user_token>`
+```json
+{
+  "tour_id": "...",
+  "payment_method": "transfer",
+  "total": "100000",
+  "pickup_location": "Hotel A",
+  "pickup_time": "2024-06-01T08:00:00Z"
+}
+```
+**Response:**
 ```json
 {
   "status": "success",
   "message": "Order created successfully",
+  "data": { /* order object */ }
+}
+```
+
+### Get Orders
+**GET** `/order/?page=1&limit=10&search=borobudur`
+Headers: `Authorization: Bearer <user_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Orders fetched successfully",
   "data": {
-    "_id": "665b7c...",
-    "user_id": "...",
-    "tour_id": "...",
-    "payment_method": "cash",
-    "order_status": "waiting",
-    "total": "100000",
-    "payment_status": "pending",
-    "pickup_location": "Hotel ABC",
-    "pickup_time": "2024-06-10T09:00:00Z",
-    "created_at": "2024-06-10T08:00:00Z",
-    "update_at": "2024-06-10T08:00:00Z"
+    "data": [ /* array of orders */ ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
   }
 }
 ```
 
-### Example Error
-
+### Get Order by ID
+**GET** `/order/:order_id`  
+Headers: `Authorization: Bearer <user_token>`
+**Response:**
 ```json
 {
-  "status": "fail",
-  "message": "Validation failed",
+  "status": "success",
+  "message": "Order fetched successfully",
+  "data": { /* order object */ }
+}
+```
+
+### Update Order
+**PUT** `/order/:order_id`  
+Headers: `Authorization: Bearer <user_token>`
+```json
+{
+  "payment_method": "cash"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Order updated successfully",
+  "data": { /* updated order object */ }
+}
+```
+
+### Delete Order
+**DELETE** `/order/:order_id`  
+Headers: `Authorization: Bearer <user_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Order deleted successfully",
+  "data": null
+}
+```
+
+---
+
+## Schedules
+
+### Create Schedule
+**POST** `/schedule/`  
+Headers: `Authorization: Bearer <admin_token>`
+```json
+{
+  "order_id": "...",
+  "driver_id": "...",
+  "times": "2024-06-01T08:00:00Z",
+  "available": true
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Schedule created successfully",
+  "data": { /* schedule object */ }
+}
+```
+
+### Get Schedules
+**GET** `/schedule/?page=1&limit=10&week=2024-06-01`
+Headers: `Authorization: Bearer <admin_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Schedules fetched successfully",
   "data": {
-    "email": "Invalid email address"
+    "data": [ /* array of schedules */ ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
   }
+}
+```
+
+### Get Schedule by ID
+**GET** `/schedule/:schedule_id`  
+Headers: `Authorization: Bearer <admin_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Schedule fetched successfully",
+  "data": { /* schedule object */ }
+}
+```
+
+### Update Schedule
+**PUT** `/schedule/:schedule_id`  
+Headers: `Authorization: Bearer <admin_token>`
+```json
+{
+  "available": false
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Schedule updated successfully",
+  "data": { /* updated schedule object */ }
+}
+```
+
+### Delete Schedule
+**DELETE** `/schedule/:schedule_id`  
+Headers: `Authorization: Bearer <admin_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Schedule deleted successfully",
+  "data": null
+}
+```
+
+---
+
+## Reviews
+
+### Driver Review
+
+#### Add Review
+**POST** `/driverReview/`  
+Headers: `Authorization: Bearer <user_token>`
+```json
+{
+  "driver_id": "...",
+  "order_id": "...",
+  "stars": 5,
+  "comment": "Great driver!"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Review added successfully",
+  "data": null
+}
+```
+
+#### Get Reviews
+**GET** `/driverReview/?page=1&limit=10&search=driver`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Reviews fetched successfully",
+  "data": {
+    "data": [ /* array of reviews */ ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+#### Get Review by ID
+**GET** `/driverReview/:review_id`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Review fetched successfully",
+  "data": { /* review object */ }
+}
+```
+
+#### Update Review
+**PUT** `/driverReview/:review_id`  
+Headers: `Authorization: Bearer <user_token>`
+```json
+{
+  "stars": 4,
+  "comment": "Good driver"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Review updated successfully",
+  "data": { /* updated review object */ }
+}
+```
+
+#### Delete Review
+**DELETE** `/driverReview/:review_id`  
+Headers: `Authorization: Bearer <user_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Review deleted successfully",
+  "data": null
+}
+```
+
+---
+
+### Tour Review
+
+#### Add Review
+**POST** `/tourReview/`  
+Headers: `Authorization: Bearer <user_token>`
+```json
+{
+  "tour_id": "...",
+  "stars": 5,
+  "comment": "Amazing tour!"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Review added successfully",
+  "data": null
+}
+```
+
+#### Get Reviews
+**GET** `/tourReview/?page=1&limit=10`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Reviews fetched successfully",
+  "data": {
+    "data": [ /* array of reviews */ ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+#### Get Review by ID
+**GET** `/tourReview/:review_id`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Review fetched successfully",
+  "data": { /* review object */ }
+}
+```
+
+#### Update Review
+**PUT** `/tourReview/:review_id`  
+Headers: `Authorization: Bearer <user_token>`
+```json
+{
+  "stars": 4,
+  "comment": "Nice tour"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Review updated successfully",
+  "data": { /* updated review object */ }
+}
+```
+
+#### Delete Review
+**DELETE** `/tourReview/:review_id`  
+Headers: `Authorization: Bearer <user_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Review deleted successfully",
+  "data": null
+}
+```
+
+---
+
+## Admin
+
+### Assign Driver Role
+**POST** `/admin/assign-driver`  
+Headers: `Authorization: Bearer <admin_token>`
+```json
+{
+  "user_id": "..."
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Driver role assigned successfully",
+  "data": null
+}
+```
+
+---
+
+## Driver Availability
+
+### Add Availability
+**POST** `/driver/availability`  
+Headers: `Authorization: Bearer <driver_token>`
+```json
+{
+  "times": "2024-06-01T08:00:00Z"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Availability added successfully",
+  "data": null
+}
+```
+
+### Search Driver Availabilities
+**POST** `/driver/availability/search`  
+Headers: `Authorization: Bearer <admin_token>`
+```json
+{
+  "date": "2024-06-01"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Availabilities fetched successfully",
+  "data": [ /* array of availabilities */ ]
 }
 ```
 
@@ -348,13 +667,14 @@ All responses follow this structure:
 
 ## Notes
 
-- All endpoints requiring authentication must include a valid JWT token.
-- Admin endpoints require the user to have the `admin` role.
-- File uploads (photo) must use `multipart/form-data`.
-- Pagination: use `page` and `limit` query parameters.
-- For enums, use the exact string values as shown in the models.
-
----
-
-For further questions, please refer to the codebase or contact the maintainers.
-
+- Semua endpoint yang membutuhkan autentikasi harus menyertakan header:  
+  `Authorization: Bearer <token>`
+- Untuk upload file (photo), gunakan form-data.
+- Semua response error akan memiliki format:
+```json
+{
+  "status": "fail",
+  "message": "Error message",
+  "data": null
+}
+```

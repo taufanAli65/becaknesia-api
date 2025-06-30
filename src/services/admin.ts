@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import User, { userRoles } from "../models/users";
 import { AppError } from "../utils/appError";
 import Driver from "../models/drivers";
+import Order from "../models/orders";
 
 export async function assignDriverRoleService(userId: string): Promise<void> {
     const session = await mongoose.startSession();
@@ -35,4 +36,39 @@ export async function assignDriverRoleService(userId: string): Promise<void> {
         // End the session
         session.endSession();
     }
+}
+
+export async function getUsersByRoleService(
+    page: number = 1,
+    limit: number = 10,
+    sortRole: "driver" | "user" = "user"
+) {
+    const skip = (page - 1) * limit;
+    const filter = { role: { $in: [userRoles.Driver, userRoles.User] } };
+    const sort: { [key: string]: 1 | -1 } = { role: sortRole === "driver" ? -1 : 1 };
+    const users = await User.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit);
+    const total = await User.countDocuments(filter);
+    return {
+        data: users,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+    };
+}
+
+export async function getAdminDashboardStatsService() {
+    const [totalOrder, totalUser, totalDriver] = await Promise.all([
+        Order.countDocuments(),
+        User.countDocuments({ role: userRoles.User }),
+        User.countDocuments({ role: userRoles.Driver }),
+    ]);
+    return {
+        totalOrder,
+        totalUser,
+        totalDriver,
+    };
 }
