@@ -51,8 +51,8 @@ export const resendVerificationEmail = async(req: Request, res: Response, next: 
 export const login = async(req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
         const { email, password } = validate(loginSchema, req.body);
-        const token = await loginService(email, password);
-        return sendSuccess(res, 200, "Login successful", { "token": token });
+        const response = await loginService(email, password);
+        return sendSuccess(res, 200, "Login successful", { "token": response.token, "user": response.userData });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         return sendFail(res, 400, errorMessage, error);

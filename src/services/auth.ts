@@ -74,7 +74,7 @@ async function resendVerificationEmailService(email: string): Promise<void> {
     });
 }
 
-async function loginService(email: string, password: string): Promise<string> {
+async function loginService(email: string, password: string): Promise<{ token: string; userData: { name: string; email: string; no_hp: string; role: userRoles; photoUrl: string; } }> {
     const user = await User.findOne({ email });
     if(!user) throw AppError("Invalid email or password", 401);
     const isPasswordValid = await comparePassword(password, user.password);
@@ -89,7 +89,14 @@ async function loginService(email: string, password: string): Promise<string> {
         process.env.JWT_SECRET as string,
         { expiresIn: "1d" }
     );
-    return token;
+    const userData = {
+        name: user.name,
+        email: user.email,
+        no_hp: user.no_hp,
+        role: user.role,
+        photoUrl: user.photoUrl
+    }
+    return { token, userData };
 }
 
 async function updateUserService(userId: string, updateData: Partial<{ name: string; email: string; no_hp: string; photoUrl: string }>): Promise<void> {
