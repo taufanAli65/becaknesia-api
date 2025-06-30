@@ -41,6 +41,3 @@ connectDatabase().then(() => {
     console.error(error);
     process.exit(1);
 })
-
-import serverless from "serverless-http";
-module.exports = serverless(app);
