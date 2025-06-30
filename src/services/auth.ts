@@ -7,10 +7,11 @@ import comparePassword from "../helpers/comparePassword";
 import jwt from "jsonwebtoken";
 
 
-async function registerService(name: string, password: string, email: string, no_hp: string, role: userRoles, photoUrl?: string): Promise<void> {
+async function registerService(name: string, password: string, email: string, no_hp: string, photoUrl?: string): Promise<void> {
     const userExists = await User.findOne({ email });
     if (userExists) throw AppError("Email already registered", 400);
     const hashedPassword = await hashPassword(password);
+    const role = userRoles.User;
     const user = new User({
         name,
         password: hashedPassword,

@@ -7,7 +7,7 @@ import { uploadPhoto } from "../helpers/supabaseUpload";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, password, email, no_hp, role } = validate(registerSchema, req.body);
+        const { name, password, email, no_hp } = validate(registerSchema, req.body);
         let photoUrl = "";
 
         if (req.file) {
@@ -15,7 +15,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         } else {
             return sendFail(res, 400, "Photo is required");
         }
-        await registerService(name, password, email, no_hp, role, photoUrl);
+        await registerService(name, password, email, no_hp, photoUrl);
         return sendSuccess(res, 201, "Registration successful. Please check your email to verify your account.");
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
