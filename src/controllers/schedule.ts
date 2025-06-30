@@ -19,7 +19,8 @@ export const getSchedules = async (req: Request, res: Response, next: NextFuncti
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    const result = await getSchedulesService(page, limit);
+    const week = req.query.week as string | undefined;
+    const result = await getSchedulesService(page, limit, week);
     return sendSuccess(res, 200, "Schedules fetched successfully", result);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";

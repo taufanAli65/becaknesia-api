@@ -3,6 +3,7 @@ import Order, { paymentStatus, orderStatus } from "../models/orders";
 import Driver from "../models/drivers";
 import { AppError } from "../utils/appError";
 import { Types } from "mongoose";
+import { startOfWeek, endOfWeek, parseISO } from "date-fns";
 
 async function createScheduleService(order_id: string, driver_id: string, times: string, available?: boolean) {
   // Check if order exists and is paid and not done
@@ -33,10 +34,25 @@ async function createScheduleService(order_id: string, driver_id: string, times:
   return schedule;
 }
 
-async function getSchedulesService(page: number = 1, limit: number = 10) {
+async function getSchedulesService(page: number = 1, limit: number = 10, week?: string) {
   const skip = (page - 1) * limit;
-  const schedules = await Schedule.find().skip(skip).limit(limit);
-  const total = await Schedule.countDocuments();
+  let filter: any = {};
+
+  if (week) {
+    // week can be an ISO date string or "YYYY-Www" (ISO week string)
+    let weekStart: Date, weekEnd: Date;
+    try {
+      const baseDate = parseISO(week);
+      weekStart = startOfWeek(baseDate, { weekStartsOn: 1 }); // Monday
+      weekEnd = endOfWeek(baseDate, { weekStartsOn: 1 });
+      filter.times = { $gte: weekStart.toISOString(), $lte: weekEnd.toISOString() };
+    } catch {
+      // fallback: ignore filter if invalid
+    }
+  }
+
+  const schedules = await Schedule.find(filter).skip(skip).limit(limit);
+  const total = await Schedule.countDocuments(filter);
   return {
     data: schedules,
     page,

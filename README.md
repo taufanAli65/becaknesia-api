@@ -216,10 +216,10 @@ Authorization: Bearer <your-jwt-token>
 
 | Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
 |--------|----------------------------|----------------------------|--------------|-----------------------------------|
-| POST   | `/auth/register`           | Register new user          | No           | name, password, email, no_hp, role, photo (file) |
+| POST   | `/auth/register`           | Register new user          | No           | name, password, email, no_hp, photo (file) |
 | POST   | `/auth/login`              | Login and get JWT token    | No           | email, password                   |
-| GET    | `/auth/activate`           | Activate user via token    | Yes (token)  | token (from JWT payload)          |
-| POST   | `/auth/resend-verification-email` | Resend verification email | Yes (token)  | email (from JWT payload)          |
+| GET    | `/auth/activate`           | Activate user via token    | No           | token (query param)               |
+| POST   | `/auth/resend-verification-email` | Resend verification email | No           | email                             |
 | PUT    | `/auth/update`             | Update user profile        | Yes          | name, email, no_hp, photoUrl      |
 
 ### Admin
@@ -233,8 +233,8 @@ Authorization: Bearer <your-jwt-token>
 | Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
 |--------|----------------------------|----------------------------|--------------|-----------------------------------|
 | POST   | `/tour/`                   | Create new tour package    | Admin        | route_name, description, duration, distances, routes, prices, photo (file) |
-| GET    | `/tour/`                   | Get all tour packages      | Admin        | page, limit, search (query)       |
-| GET    | `/tour/:tourID`            | Get tour package by ID     | Admin        | tourID (param)                    |
+| GET    | `/tour/`                   | Get all tour packages      | No           | page, limit, search (query)       |
+| GET    | `/tour/:tourID`            | Get tour package by ID     | No           | tourID (param)                    |
 | PUT    | `/tour/:tourID`            | Update tour package        | Admin        | fields to update, photo (file)    |
 | DELETE | `/tour/:tourID`            | Delete tour package        | Admin        | tourID (param)                    |
 
@@ -263,7 +263,7 @@ Authorization: Bearer <your-jwt-token>
 | Method | Endpoint                   | Description                | Auth Required | Body/Params                       |
 |--------|----------------------------|----------------------------|--------------|-----------------------------------|
 | POST   | `/schedule/`               | Create schedule            | Admin        | order_id, driver_id, times, available |
-| GET    | `/schedule/`               | Get all schedules          | Admin        | page, limit (query)               |
+| GET    | `/schedule/`               | Get all schedules          | Admin        | page, limit, week (query)         |
 | GET    | `/schedule/:schedule_id`   | Get schedule by ID         | Admin        | schedule_id (param)               |
 | PUT    | `/schedule/:schedule_id`   | Update schedule            | Admin        | fields to update                  |
 | DELETE | `/schedule/:schedule_id`   | Delete schedule            | Admin        | schedule_id (param)               |
