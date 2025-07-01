@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { createOrderService, getOrdersService, getOrderService, updateOrderService, deleteOrderService, getAcceptedOrdersForDriverService, getOrdersByUserIDService } from "../services/order";
+import { createOrderService, getOrdersService, getOrderService, updateOrderService, deleteOrderService, getAcceptedOrdersForDriverService, getOrdersByUserIDService, getWaitingOrdersService } from "../services/order";
 import { sendSuccess, sendFail } from "../utils/senResponse";
 import { validate } from "../utils/validate";
-import { createOrderSchema, updateOrderSchema, needOrderIDSchema, searchAcceptedOrdersSchema, getOrdersByUserIDSchema } from "../validators/order";
+import { createOrderSchema, updateOrderSchema, needOrderIDSchema, searchAcceptedOrdersSchema, getOrdersByUserIDSchema, getWaitingOrdersSchema } from "../validators/order";
 
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -87,6 +87,17 @@ export const getOrdersByUserID = async (req: Request, res: Response, next: NextF
     }
     const orders = await getOrdersByUserIDService(user_id);
     return sendSuccess(res, 200, "Orders fetched successfully", orders);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const getWaitingOrders = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { page = 1, limit = 10 } = validate(getWaitingOrdersSchema, req.query);
+    const result = await getWaitingOrdersService(page, limit);
+    return sendSuccess(res, 200, "Waiting orders fetched successfully", result);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return sendFail(res, 400, errorMessage, error);

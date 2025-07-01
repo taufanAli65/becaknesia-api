@@ -124,6 +124,28 @@ async function getOrdersByUserIDService(user_id: string) {
   return ordersWithTourName;
 }
 
+async function getWaitingOrdersService(page: number = 1, limit: number = 10) {
+  const skip = (page - 1) * limit;
+  const query = { order_status: "waiting" };
+  const orders = await Order.find(query).skip(skip).limit(limit).populate("tour_id", "route_name");
+  const total = await Order.countDocuments(query);
+  // Add tour_name to each order
+  const ordersWithTourName = orders.map(order => {
+    const obj = order.toObject() as any;
+    obj.tour_name = obj.tour_id && typeof obj.tour_id === "object" && "route_name" in obj.tour_id
+      ? (obj.tour_id as { route_name?: string }).route_name
+      : null;
+    return obj;
+  });
+  return {
+    data: ordersWithTourName,
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit)
+  };
+}
+
 export { 
   createOrderService, 
   getOrdersService, 
@@ -131,5 +153,6 @@ export {
   updateOrderService, 
   deleteOrderService,
   getAcceptedOrdersForDriverService,
-  getOrdersByUserIDService
+  getOrdersByUserIDService,
+  getWaitingOrdersService
 };
