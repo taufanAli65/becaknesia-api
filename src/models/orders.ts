@@ -27,7 +27,8 @@ export interface IOrder extends Document {
     total: number,
     payment_status: paymentStatus,
     pickup_location: string,
-    pickup_time: string
+    pickup_time: string,
+    pickup_date: string // add this line
 }
 
 const orderSchema = new Schema ({
@@ -52,7 +53,8 @@ const orderSchema = new Schema ({
         default: paymentStatus.Pending
     },
     pickup_location: {type: String, required: true},
-    pickup_time: {type: String, required: true}
+    pickup_time: {type: String, required: true},
+    pickup_date: {type: String, required: true} // add this line
 }, {
     timestamps: {createdAt: "created_at", updatedAt: "update_at"}
 });

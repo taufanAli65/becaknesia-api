@@ -12,6 +12,7 @@ export const createOrderSchema = z.object({
   total: z.number().min(1, "Total is required"),
   pickup_location: z.string().min(1, "Pickup location is required"),
   pickup_time: z.string().min(1, "Pickup time is required"),
+  pickup_date: z.string().min(1, "Pickup date is required"),
 });
 
 export const updateOrderSchema = z.object({

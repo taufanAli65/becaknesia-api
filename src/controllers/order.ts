@@ -7,8 +7,8 @@ import { createOrderSchema, updateOrderSchema, needOrderIDSchema, searchAccepted
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user_id = req.user.id;
-    const { tour_id, payment_method, total, pickup_location, pickup_time } = validate(createOrderSchema, req.body);
-    const order = await createOrderService(user_id, tour_id, payment_method, total, pickup_location, pickup_time);
+    const { tour_id, payment_method, total, pickup_location, pickup_time, pickup_date } = validate(createOrderSchema, req.body);
+    const order = await createOrderService(user_id, tour_id, payment_method, total, pickup_location, pickup_time, pickup_date);
     return sendSuccess(res, 201, "Order created successfully", order);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
