@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { assignDriverRoleService, getUsersByRoleService, getAdminDashboardStatsService } from "../services/admin";
+import { assignDriverRoleService, getUsersByRoleService, getAdminDashboardStatsService, getAllDriverAvailabilitiesService } from "../services/admin";
 import { sendFail, sendSuccess } from "../utils/senResponse";
+import { validate } from "../utils/validate";
+import { adminDriverAvailabilitiesQuerySchema } from "../validators/admin";
 
 export const assignDriverRole = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -33,6 +35,17 @@ export const getAdminDashboardStats = async (req: Request, res: Response, next: 
     try {
         const stats = await getAdminDashboardStatsService();
         return sendSuccess(res, 200, "Dashboard stats fetched successfully", stats);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return sendFail(res, 400, errorMessage, error);
+    }
+};
+
+export const getAllDriverAvailabilities = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { page, limit, days, times } = validate(adminDriverAvailabilitiesQuerySchema, req.query);
+        const result = await getAllDriverAvailabilitiesService(page, limit, days, times);
+        return sendSuccess(res, 200, "All driver availabilities fetched successfully", result);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         return sendFail(res, 400, errorMessage, error);

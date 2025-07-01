@@ -657,6 +657,24 @@ Headers: `Authorization: Bearer <admin_token>`
 }
 ```
 
+### Get All Driver Availabilities
+**GET** `/admin/driver-availabilities?page=1&limit=10&days=monday&times=08.00%20-%2010.00`  
+Headers: `Authorization: Bearer <admin_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "All driver availabilities fetched successfully",
+  "data": {
+    "data": [ /* array of driver availabilities */ ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
 ---
 
 ## Driver Availability
@@ -666,14 +684,57 @@ Headers: `Authorization: Bearer <admin_token>`
 Headers: `Authorization: Bearer <driver_token>`
 ```json
 {
-  "times": "2024-06-01T08:00:00Z"
+  "days": "monday",
+  "times": "08.00 - 10.00"
 }
 ```
 **Response:**
 ```json
 {
   "status": "success",
-  "message": "Availability added successfully",
+  "message": "Add availabilities successfully",
+  "data": { /* availability object */ }
+}
+```
+
+### Get Driver's Own Availabilities
+**GET** `/driver/availability`  
+Headers: `Authorization: Bearer <driver_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Get driver availabilities successfully",
+  "data": [ /* array of availabilities */ ]
+}
+```
+
+### Update Driver Availability
+**PUT** `/driver/availability/:availability_id`  
+Headers: `Authorization: Bearer <driver_token>`
+```json
+{
+  "days": "tuesday",
+  "times": "14.00 - 16.00"
+}
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Availability updated successfully",
+  "data": { /* updated availability object */ }
+}
+```
+
+### Delete Driver Availability
+**DELETE** `/driver/availability/:availability_id`  
+Headers: `Authorization: Bearer <driver_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Availability deleted successfully",
   "data": null
 }
 ```
@@ -683,14 +744,15 @@ Headers: `Authorization: Bearer <driver_token>`
 Headers: `Authorization: Bearer <admin_token>`
 ```json
 {
-  "date": "2024-06-01"
+  "days": "monday",
+  "times": "08.00 - 10.00"
 }
 ```
 **Response:**
 ```json
 {
   "status": "success",
-  "message": "Availabilities fetched successfully",
+  "message": "Search driver availabilities successfully",
   "data": [ /* array of availabilities */ ]
 }
 ```

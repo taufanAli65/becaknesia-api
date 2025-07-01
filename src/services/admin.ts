@@ -3,6 +3,7 @@ import User, { userRoles } from "../models/users";
 import { AppError } from "../utils/appError";
 import Driver from "../models/drivers";
 import Order from "../models/orders";
+import DriverAvailability from "../models/driverAvailability";
 
 export async function assignDriverRoleService(userId: string): Promise<void> {
     const session = await mongoose.startSession();
@@ -70,5 +71,21 @@ export async function getAdminDashboardStatsService() {
         totalOrder,
         totalUser,
         totalDriver,
+    };
+}
+
+export async function getAllDriverAvailabilitiesService(page: number = 1, limit: number = 10, days?: string, times?: string) {
+    const skip = (page - 1) * limit;
+    const query: any = {};
+    if (days) query.days = days;
+    if (times) query.times = times;
+    const availabilities = await DriverAvailability.find(query).skip(skip).limit(limit);
+    const total = await DriverAvailability.countDocuments(query);
+    return {
+        data: availabilities,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
     };
 }
