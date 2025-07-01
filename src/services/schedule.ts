@@ -53,8 +53,23 @@ async function getSchedulesService(page: number = 1, limit: number = 10, week?: 
 
   const schedules = await Schedule.find(filter).skip(skip).limit(limit);
   const total = await Schedule.countDocuments(filter);
+
+  // Fetch pickup_date for each schedule from the related order
+  const schedulesWithPickupDate = await Promise.all(
+    schedules.map(async (schedule) => {
+      let pickup_date = null;
+      if (schedule.order_id) {
+        const order = await Order.findById(schedule.order_id).select("pickup_date");
+        pickup_date = order ? order.pickup_date : null;
+      }
+      const obj = schedule.toObject() as any;
+      obj.pickup_date = pickup_date;
+      return obj;
+    })
+  );
+
   return {
-    data: schedules,
+    data: schedulesWithPickupDate,
     page,
     limit,
     total,
