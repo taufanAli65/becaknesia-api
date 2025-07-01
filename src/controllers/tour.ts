@@ -73,26 +73,47 @@ export const getTourPackage = async(req: Request, res: Response, next: NextFunct
 
 export const updateTourPackage = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Validate tourID from route params
     const { tourID } = validate(needTourIDSchema, req.params);
-    const { route_name, description, duration, distances, routes, prices } = validate(
+
+    // Validate and parse the rest of the fields from the request body
+    let { route_name, description, duration, distances, routes, prices } = validate(
       updateTourPackageSchema.omit({ photo_url: true }),
       req.body
     );
-    let photo_url: string | undefined = undefined;
-    if (req.file) {
-      photo_url = await uploadPhoto("tour", req.file);
+
+    // Explicitly parse the numeric fields to ensure they are numbers
+    const parsedDuration = Number(duration);
+    const parsedDistances = Number(distances);
+    const parsedPrices = Number(prices);
+
+    // Check if the parsed values are NaN (Not a Number)
+    if (isNaN(parsedDuration) || isNaN(parsedDistances) || isNaN(parsedPrices)) {
+      throw new Error("Duration, distances, and prices must be valid numbers.");
     }
+
+    // Fetch the current tour from the database (for existing photo_url)
+    const currentTour = await getTourPackageService(tourID);
+    if (!currentTour) {
+      throw new Error("Tour not found.");
+    }
+
+    // If no new file is uploaded, retain the current photo_url
+    let photo_url: string | undefined = req.file ? await uploadPhoto("tour", req.file) : currentTour.photo_url;
+
+    // Call the service to update the tour package
     const updatedTour = await updateTourPackageService(
       tourID,
       route_name,
       description,
-      duration,
-      distances,
+      parsedDuration,
+      parsedDistances,
       routes,
-      prices,
-      photo_url // optional
+      parsedPrices,
+      photo_url // Use the existing photo_url if no new file is uploaded
     );
 
+    // Send success response with updated tour
     return sendSuccess(res, 200, "Tour package updated successfully", updatedTour);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
