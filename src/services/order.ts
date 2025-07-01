@@ -86,17 +86,26 @@ async function getAcceptedOrdersForDriverService(driver_id: string, page: number
     ];
   }
 
+  // Populate tour_id and user_id to get route_name and user name
   const orders = await Order.find(orderQuery)
     .skip(skip)
     .limit(limit)
+    .populate("tour_id", "route_name")
+    .populate("user_id", "name")
     .lean();
 
-  // Attach schedule info to each order
+  // Attach schedule info, tour_name, and user_name to each order
   const schedulesMap = new Map();
   schedules.forEach(s => schedulesMap.set(String(s.order_id), s));
   const data = orders.map(order => ({
     ...order,
-    schedule: schedulesMap.get(String(order._id)) || null
+    schedule: schedulesMap.get(String(order._id)) || null,
+    tour_name: order.tour_id && typeof order.tour_id === "object" && "route_name" in order.tour_id
+      ? (order.tour_id as { route_name?: string }).route_name
+      : null,
+    user_name: order.user_id && typeof order.user_id === "object" && "name" in order.user_id
+      ? (order.user_id as { name?: string }).name
+      : null
   }));
 
   const total = await Order.countDocuments(orderQuery);
@@ -111,22 +120,17 @@ async function getAcceptedOrdersForDriverService(driver_id: string, page: number
 
 async function getOrdersByUserIDService(user_id: string) {
   if (!user_id) throw AppError("User ID is required", 400);
-  // Populate the tour_id to get route_name (tour_name) and user_id to get user name
-  const orders = await Order.find({ user_id })
-    .populate("tour_id", "route_name")
-    .populate("user_id", "name");
-  // Map orders to include tour_name and user_name at top level
-  const ordersWithTourAndUserName = orders.map(order => {
+  // Populate the tour_id to get route_name (tour_name)
+  const orders = await Order.find({ user_id }).populate("tour_id", "route_name");
+  // Map orders to include tour_name at top level
+  const ordersWithTourName = orders.map(order => {
     const obj = order.toObject() as any;
     obj.tour_name = obj.tour_id && typeof obj.tour_id === "object" && "route_name" in obj.tour_id
       ? (obj.tour_id as { route_name?: string }).route_name
       : null;
-    obj.user_name = obj.user_id && typeof obj.user_id === "object" && "name" in obj.user_id
-      ? (obj.user_id as { name?: string }).name
-      : null;
     return obj;
   });
-  return ordersWithTourAndUserName;
+  return ordersWithTourName;
 }
 
 async function getWaitingOrdersService(page: number = 1, limit: number = 10) {
