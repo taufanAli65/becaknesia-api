@@ -1,8 +1,8 @@
 import Place from "../models/places";
 import { AppError } from "../utils/appError";
 
-async function createPlaceService(name: string, coordinates: string, description: string, photo_url: string) {
-    const place = new Place({name, coordinates, description, photo_url});
+async function createPlaceService(name: string, coordinates: string, description: string, photo_url: string, category: string) {
+    const place = new Place({name, coordinates, description, photo_url, category});
     await place.save();
 }
 
@@ -36,13 +36,14 @@ async function getPlaceService(placeID: string) {
     return place;
 }
 
-async function updatePlaceService(placeID: string, name?: string, coordinates?: string, description?: string, photo_url?: string) {
+async function updatePlaceService(placeID: string, name?: string, coordinates?: string, description?: string, photo_url?: string, category?: string) {
   if (!placeID) throw AppError("Place ID is required", 400);
   const updateFields: any = {};
   if (name !== undefined) updateFields.name = name;
   if (coordinates !== undefined) updateFields.coordinates = coordinates;
   if (description !== undefined) updateFields.description = description;
   if (photo_url !== undefined) updateFields.photo_url = photo_url;
+  if (category !== undefined) updateFields.category = category;
   if (Object.keys(updateFields).length === 0) {
     throw AppError("No update data provided", 400);
   }

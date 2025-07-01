@@ -14,11 +14,11 @@ export const createPlace = async (req: Request, res: Response, next: NextFunctio
         return sendFail(res, 400, "Photo is required");
     }
     // Validate the rest of the fields except photo_url
-    const { name, coordinates, description, } = validate(
+    const { name, coordinates, description, category } = validate(
         createPlaceSchema.omit({ photo_url: true }),
         req.body
     );
-    await createPlaceService(name, coordinates, description, photo_url);
+    await createPlaceService(name, coordinates, description, photo_url, category);
     return sendSuccess(res, 201, "Place created successfully");
   } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
@@ -59,7 +59,7 @@ export const updatePlace = async (req: Request, res: Response, next: NextFunctio
     if (req.file) {
       photo_url = await uploadPhoto("place", req.file);
     }
-    const { name, coordinates, description } = validate(
+    const { name, coordinates, description, category } = validate(
       updatePlaceSchema.omit({ photo_url: true }),
       req.body
     );
@@ -68,7 +68,8 @@ export const updatePlace = async (req: Request, res: Response, next: NextFunctio
       name,
       coordinates,
       description,
-      photo_url
+      photo_url,
+      category
     );
     return sendSuccess(res, 200, "Place updated successfully", updated);
   } catch (error) {
