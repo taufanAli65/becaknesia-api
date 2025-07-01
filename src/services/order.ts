@@ -95,11 +95,18 @@ async function getAcceptedOrdersForDriverService(driver_id: string, page: number
   };
 }
 
+async function getOrdersByUserIDService(user_id: string) {
+  if (!user_id) throw AppError("User ID is required", 400);
+  const orders = await Order.find({ user_id });
+  return orders;
+}
+
 export { 
   createOrderService, 
   getOrdersService, 
   getOrderService, 
   updateOrderService, 
   deleteOrderService,
-  getAcceptedOrdersForDriverService
+  getAcceptedOrdersForDriverService,
+  getOrdersByUserIDService
 };

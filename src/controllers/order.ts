@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { createOrderService, getOrdersService, getOrderService, updateOrderService, deleteOrderService, getAcceptedOrdersForDriverService } from "../services/order";
+import { createOrderService, getOrdersService, getOrderService, updateOrderService, deleteOrderService, getAcceptedOrdersForDriverService, getOrdersByUserIDService } from "../services/order";
 import { sendSuccess, sendFail } from "../utils/senResponse";
 import { validate } from "../utils/validate";
-import { createOrderSchema, updateOrderSchema, needOrderIDSchema, searchAcceptedOrdersSchema } from "../validators/order";
+import { createOrderSchema, updateOrderSchema, needOrderIDSchema, searchAcceptedOrdersSchema, getOrdersByUserIDSchema } from "../validators/order";
 
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -72,6 +72,21 @@ export const getAcceptedOrdersForDriver = async (req: Request, res: Response, ne
     validate(searchAcceptedOrdersSchema, { driver_id, page, limit, search });
     const result = await getAcceptedOrdersForDriverService(driver_id, page, limit, search);
     return sendSuccess(res, 200, "Accepted orders fetched successfully", result);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const getOrdersByUserID = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { user_id } = validate(getOrdersByUserIDSchema, req.params);
+    // Only allow the user to access their own orders
+    if (req.user.id !== user_id) {
+      return sendFail(res, 403, "Forbidden: You can only access your own orders");
+    }
+    const orders = await getOrdersByUserIDService(user_id);
+    return sendSuccess(res, 200, "Orders fetched successfully", orders);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return sendFail(res, 400, errorMessage, error);

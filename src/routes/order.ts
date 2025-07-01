@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { createOrder, getOrders, getOrder, updateOrder, deleteOrder, getAcceptedOrdersForDriver } from "../controllers/order";
+import { createOrder, getOrders, getOrder, updateOrder, deleteOrder, getAcceptedOrdersForDriver, getOrdersByUserID } from "../controllers/order";
 import { authenticated } from "../middlewares/authenticated";
 import { authorize } from "../middlewares/authorize";
 import { userRoles } from "../models/users";
@@ -12,5 +12,6 @@ router.get("/:order_id", authenticated, (req: Request, res: Response, next: Next
 router.put("/:order_id", authenticated, (req: Request, res: Response, next: NextFunction) => { updateOrder(req, res, next) });
 router.delete("/:order_id", authenticated, (req: Request, res: Response, next: NextFunction) => { deleteOrder(req, res, next) });
 router.get("/driver/accepted", authenticated, authorize(userRoles.Driver), (req: Request, res: Response, next: NextFunction) => { getAcceptedOrdersForDriver(req, res, next) });
+router.get("/user/:user_id/all", authenticated, (req: Request, res: Response, next: NextFunction) => { getOrdersByUserID(req, res, next) });
 
 export default router;

@@ -31,3 +31,7 @@ export const searchAcceptedOrdersSchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(10).optional(),
   search: z.string().optional()
 });
+
+export const getOrdersByUserIDSchema = z.object({
+  user_id: objectIdSchema,
+});

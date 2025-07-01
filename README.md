@@ -384,6 +384,40 @@ Headers: `Authorization: Bearer <driver_token>`
 }
 ```
 
+## Order Endpoints
+
+### Get All Orders by User ID
+
+- **Endpoint:** `GET /order/user/:user_id/all`
+- **Auth:** User (must be the same as `user_id`)
+- **Description:** Get all orders for the specified user.
+- **Params:**
+  - `user_id` (string, required): The user's ObjectId.
+- **Response:**
+  - `200 OK` with array of order objects.
+
+**Example Request:**
+```
+GET /order/user/60f7c2e5b4d1c8001c8e4b2a/all
+Authorization: Bearer <token>
+```
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "message": "Orders fetched successfully",
+  "data": [
+    {
+      "_id": "orderid1",
+      "user_id": "60f7c2e5b4d1c8001c8e4b2a",
+      // ...other order fields...
+    },
+    // ...
+  ]
+}
+```
+
 ---
 
 ## Schedules
