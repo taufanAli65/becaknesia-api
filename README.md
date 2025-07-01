@@ -79,12 +79,13 @@ Form-data (with photo upload):
 ### Update User
 **PUT** `/auth/update`  
 Headers: `Authorization: Bearer <token>`
+Form-data (with photo upload):
 ```json
 {
   "name": "John Updated",
   "email": "john2@example.com",
   "no_hp": "08123456780",
-  "photoUrl": "https://..."
+  "photo": (file)
 }
 ```
 **Response:**
@@ -152,12 +153,14 @@ Form-data (with photo upload):
 ### Update Place
 **PUT** `/place/:place_id`  
 Headers: `Authorization: Bearer <admin_token>`
+Form-data (with photo upload):
 ```json
 {
   "name": "Borobudur Updated",
   "coordinates": "-7.6079,110.2038",
   "description": "Candi Borobudur Updated",
-  "photoUrl": "https://..."
+  "category": "Candi",
+  "photo": (file)
 }
 ```
 **Response:**
@@ -240,6 +243,7 @@ Form-data (with photo upload):
 ### Update Tour Package
 **PUT** `/tour/:tourID`  
 Headers: `Authorization: Bearer <admin_token>`
+Form-data (with photo upload):
 ```json
 {
   "route_name": "Tour Borobudur Updated",
@@ -248,7 +252,7 @@ Headers: `Authorization: Bearer <admin_token>`
   "distances": 12,
   "routes": ["Borobudur", "Mendut", "Pawon"],
   "prices": 120000,
-  "photoUrl": "https://..."
+  "photo": (file)
 }
 ```
 **Response:**
@@ -622,6 +626,34 @@ Headers: `Authorization: Bearer <admin_token>`
   "status": "success",
   "message": "Driver role assigned successfully",
   "data": null
+}
+```
+
+### Get Users By Role
+**GET** `/admin/users`  
+Headers: `Authorization: Bearer <admin_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Users fetched successfully",
+  "data": [
+    /* array of user objects */
+  ]
+}
+```
+
+### Get Admin Dashboard Stats
+**GET** `/admin/dashboard/stats`  
+Headers: `Authorization: Bearer <admin_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Dashboard stats fetched successfully",
+  "data": {
+    /* stats object, e.g. { totalUsers: 100, totalOrders: 50, ... } */
+  }
 }
 ```
 

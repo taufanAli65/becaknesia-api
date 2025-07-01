@@ -13,18 +13,38 @@ export const createNewTourPackage = async(req: Request, res: Response, next: Nex
         } else {
             return sendFail(res, 400, "Photo is required");
         }
+
+        // Parse the incoming data to ensure correct types
+        const { route_name, description, duration, distances, routes, prices } = req.body;
+
+        // Explicitly cast values to the expected types
+        const parsedDuration = Number(duration);
+        const parsedDistances = Number(distances);
+        const parsedPrices = Number(prices);
+
         // Validate the rest of the fields except photo_url
-        const {route_name, description, duration, distances, routes, prices} = validate(
+        const { route_name: validatedRouteName, description: validatedDescription } = validate(
             createNewTourPackageSchema.omit({ photo_url: true }),
-            req.body
+            {
+                route_name,
+                description,
+                duration: parsedDuration,  // Pass parsed values
+                distances: parsedDistances,
+                routes,
+                prices: parsedPrices
+            }
         );
-        await createNewTourPackageService(route_name, description, duration, distances, routes, prices, photo_url);
+
+        // Call the service function
+        await createNewTourPackageService(validatedRouteName, validatedDescription, parsedDuration, parsedDistances, routes, parsedPrices, photo_url);
+
         return sendSuccess(res, 200, "New tour package is created successfully");
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         return sendFail(res, 400, errorMessage, error);
     }
 }
+
 
 export const getAllTourPackages = async (req: Request, res: Response, next: NextFunction) => {
   try {
