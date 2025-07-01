@@ -35,9 +35,19 @@ async function getOrdersService(page: number = 1, limit: number = 10, search?: s
 
 async function getOrderService(order_id: string) {
   if (!order_id) throw AppError("Order ID is required", 400);
-  const order = await Order.findById(order_id);
-  if (!order) throw AppError("Order not found", 404);
-  return order;
+  const orders = await Order.findById(order_id ).populate("tour_id", "route_name");
+  if (!orders) {
+    return [];
+  }
+  // Map orders to include tour_name at top level
+  const ordersWithTourName = [orders].map(order => {
+    const obj = order.toObject() as any;
+    obj.tour_name = obj.tour_id && typeof obj.tour_id === "object" && "route_name" in obj.tour_id
+      ? (obj.tour_id as { route_name?: string }).route_name
+      : null;
+    return obj;
+  });
+  return ordersWithTourName;
 }
 
 async function updateOrderService(order_id: string, updateData: any) {
