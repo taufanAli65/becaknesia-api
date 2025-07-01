@@ -101,8 +101,17 @@ async function getAcceptedOrdersForDriverService(driver_id: string, page: number
 
 async function getOrdersByUserIDService(user_id: string) {
   if (!user_id) throw AppError("User ID is required", 400);
-  const orders = await Order.find({ user_id });
-  return orders;
+  // Populate the tour_id to get route_name (tour_name)
+  const orders = await Order.find({ user_id }).populate("tour_id", "route_name");
+  // Map orders to include tour_name at top level
+  const ordersWithTourName = orders.map(order => {
+    const obj = order.toObject() as any;
+    obj.tour_name = obj.tour_id && typeof obj.tour_id === "object" && "route_name" in obj.tour_id
+      ? (obj.tour_id as { route_name?: string }).route_name
+      : null;
+    return obj;
+  });
+  return ordersWithTourName;
 }
 
 export { 
