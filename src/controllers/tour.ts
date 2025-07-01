@@ -77,10 +77,7 @@ export const updateTourPackage = async (req: Request, res: Response, next: NextF
     const { tourID } = validate(needTourIDSchema, req.params);
 
     // Validate and parse the rest of the fields from the request body
-    let { route_name, description, duration, distances, routes, prices } = validate(
-      updateTourPackageSchema.omit({ photo_url: true }),
-      req.body
-    );
+    let { route_name, description, duration, distances, routes, prices } = req.body
 
     // Explicitly parse the numeric fields to ensure they are numbers
     const parsedDuration = Number(duration);
