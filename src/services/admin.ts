@@ -44,10 +44,10 @@ export async function getUsersByRoleService(
     sortRole: "driver" | "user" = "user"
 ) {
     const skip = (page - 1) * limit;
-    const filter = { role: { $in: [userRoles.Driver, userRoles.User] } };
-    const sort: { [key: string]: 1 | -1 } = { role: sortRole === "driver" ? -1 : 1 };
+    const filter = sortRole === "user"
+        ? { role: userRoles.User }
+        : { role: userRoles.Driver };
     const users = await User.find(filter)
-        .sort(sort)
         .skip(skip)
         .limit(limit);
     const total = await User.countDocuments(filter);
