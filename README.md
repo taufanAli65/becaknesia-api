@@ -360,6 +360,30 @@ Headers: `Authorization: Bearer <user_token>`
 }
 ```
 
+### Driver: Get Accepted Orders (See Orders to Work On)
+**GET** `/order/driver/accepted?page=1&limit=10&search=...`  
+Headers: `Authorization: Bearer <driver_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Accepted orders fetched successfully",
+  "data": {
+    "data": [
+      {
+        /* order object */,
+        "schedule": { /* schedule object for this order and driver */ }
+      }
+      // ...more orders
+    ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
 ---
 
 ## Schedules

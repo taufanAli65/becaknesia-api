@@ -24,3 +24,10 @@ export const updateOrderSchema = z.object({
 export const needOrderIDSchema = z.object({
   order_id: objectIdSchema,
 });
+
+export const searchAcceptedOrdersSchema = z.object({
+  driver_id: objectIdSchema,
+  page: z.coerce.number().min(1).default(1).optional(),
+  limit: z.coerce.number().min(1).max(100).default(10).optional(),
+  search: z.string().optional()
+});

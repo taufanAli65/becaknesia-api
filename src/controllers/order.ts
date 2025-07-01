@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { createOrderService, getOrdersService, getOrderService, updateOrderService, deleteOrderService } from "../services/order";
+import { createOrderService, getOrdersService, getOrderService, updateOrderService, deleteOrderService, getAcceptedOrdersForDriverService } from "../services/order";
 import { sendSuccess, sendFail } from "../utils/senResponse";
 import { validate } from "../utils/validate";
-import { createOrderSchema, updateOrderSchema, needOrderIDSchema } from "../validators/order";
+import { createOrderSchema, updateOrderSchema, needOrderIDSchema, searchAcceptedOrdersSchema } from "../validators/order";
 
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -57,6 +57,21 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
     const { order_id } = validate(needOrderIDSchema, req.params);
     await deleteOrderService(order_id);
     return sendSuccess(res, 200, "Order deleted successfully");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const getAcceptedOrdersForDriver = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const driver_id = req.user.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string | undefined;
+    validate(searchAcceptedOrdersSchema, { driver_id, page, limit, search });
+    const result = await getAcceptedOrdersForDriverService(driver_id, page, limit, search);
+    return sendSuccess(res, 200, "Accepted orders fetched successfully", result);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return sendFail(res, 400, errorMessage, error);
