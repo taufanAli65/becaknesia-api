@@ -2,7 +2,7 @@ import Order from "../models/orders";
 import Schedule from "../models/schedules";
 import { AppError } from "../utils/appError";
 
-async function createOrderService(user_id: string, tour_id: string, payment_method: string, total: string, pickup_location: string, pickup_time: string) {
+async function createOrderService(user_id: string, tour_id: string, payment_method: string, total: number, pickup_location: string, pickup_time: string) {
   const order = new Order({ user_id, tour_id, payment_method, total, pickup_location, pickup_time });
   await order.save();
   return order;

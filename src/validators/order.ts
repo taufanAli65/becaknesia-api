@@ -9,7 +9,7 @@ const objectIdSchema = z.string().refine((val) => mongoose.Types.ObjectId.isVali
 export const createOrderSchema = z.object({
   tour_id: objectIdSchema,
   payment_method: z.nativeEnum(paymentMethod),
-  total: z.string().min(1, "Total is required"),
+  total: z.number().min(1, "Total is required"),
   pickup_location: z.string().min(1, "Pickup location is required"),
   pickup_time: z.string().min(1, "Pickup time is required"),
 });
