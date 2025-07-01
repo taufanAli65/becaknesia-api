@@ -17,7 +17,7 @@ async function createScheduleService(order_id: string, driver_id: string, times:
   if (existingSchedule) throw AppError("This order already has a driver assigned", 400);
 
   // Ensure driver exists
-  const driver = await Driver.findById(driver_id);
+  const driver = await Driver.find({user_id: driver_id});
   if (!driver) throw AppError("Driver not found", 404);
 
   // Ensure driver is not assigned to another order at the same time
