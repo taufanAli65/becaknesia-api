@@ -90,6 +90,7 @@ async function loginService(email: string, password: string): Promise<{ token: s
         { expiresIn: "1d" }
     );
     const userData = {
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
         no_hp: user.no_hp,
