@@ -18,8 +18,8 @@ export enum timesArray {
 
 export interface IDriverAvailability extends Document{
     driver_id: Types.ObjectId,
-    days: Array<daysArray>,
-    times: Array<timesArray>
+    days: daysArray,
+    times: timesArray,
     created_at: Date,
     updated_at: Date
 }
@@ -27,16 +27,14 @@ export interface IDriverAvailability extends Document{
 const driverAvailabilitySchema = new Schema({
     driver_id: {type: Types.ObjectId, ref: "Drivers", required: true},
     days: {
-        type: [String],
+        type: String,
         enum: Object.values(daysArray),
         required: true,
-        validate: [(arr: string | any[]) => arr.length > 0, 'At least one day is required']
     },
     times: {
-        type: [String],
+        type: String,
         enum: Object.values(timesArray),
         required: true,
-        validate: [(arr: string | any[]) => arr.length > 0, 'At least one time is required']
     }
 }, {
     timestamps: {createdAt: "created_at", updatedAt: "updated_at"}

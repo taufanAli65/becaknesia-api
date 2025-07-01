@@ -2,12 +2,11 @@ import DriverAvailability, { daysArray, timesArray } from "../models/driverAvail
 import { Types } from "mongoose";
 import { AppError } from "../utils/appError";
 import Driver from "../models/drivers";
-import findDriver from "../helpers/findAvailableDriver";
 
 interface AddAvailabilityInput {
     driver_id: string;
-    days: daysArray[];
-    times: timesArray[];
+    days: daysArray;
+    times: timesArray;
 }
 
 async function addAvailabilitiesService(data: AddAvailabilityInput) {
@@ -26,40 +25,54 @@ async function addAvailabilitiesService(data: AddAvailabilityInput) {
 };
 
 async function getDriverAvailabilitiesService(driver_id: string) {
-    const driverAvailability = await DriverAvailability.findOne({driver_id})
-
-    if (!driverAvailability) {
-      throw AppError("Driver not found", 404);
-    }
-
-    return driverAvailability;
+    if (!Types.ObjectId.isValid(driver_id)) throw AppError("Invalid driver ID", 400);
+    const availabilities = await DriverAvailability.find({ driver_id });
+    return availabilities;
 }
 
 interface SearchAvailabilityInput {
-    days?: daysArray[];
-    times?: timesArray[];
+    days?: daysArray;
+    times?: timesArray;
 }
 
 async function searchDriverAvailabilitiesService(data: SearchAvailabilityInput) {
     const { days, times } = data;
-    // If both days and times are provided and are single values, use findDriver
-    if (
-        Array.isArray(days) && days.length === 1 &&
-        Array.isArray(times) && times.length === 1
-    ) {
-        return await findDriver(days[0], times[0]);
-    }
-    // fallback to original query for multiple days/times
     const query: any = {};
-    if (days && days.length > 0) {
-        query.days = { $in: days };
-    }
-    if (times && times.length > 0) {
-        query.times = { $in: times };
-    }
+    if (days) query.days = days;
+    if (times) query.times = times;
     const availabilities = await DriverAvailability.find(query);
     return availabilities;
 }
 
+// Update & Delete
+async function updateDriverAvailabilityService(driver_id: string, availability_id: string, days?: daysArray, times?: timesArray) {
+    if (!Types.ObjectId.isValid(driver_id)) throw AppError("Invalid driver ID", 400);
+    if (!Types.ObjectId.isValid(availability_id)) throw AppError("Invalid availability ID", 400);
+    const availability = await DriverAvailability.findById(availability_id);
+    if (!availability) throw AppError("Availability not found", 404);
+    if (availability.driver_id.toString() !== driver_id) throw AppError("Unauthorized", 403);
 
-export {addAvailabilitiesService, getDriverAvailabilitiesService, searchDriverAvailabilitiesService}
+    if (days) availability.days = days;
+    if (times) availability.times = times;
+    await availability.save();
+    return availability;
+}
+
+async function deleteDriverAvailabilityService(driver_id: string, availability_id: string) {
+    if (!Types.ObjectId.isValid(driver_id)) throw AppError("Invalid driver ID", 400);
+    if (!Types.ObjectId.isValid(availability_id)) throw AppError("Invalid availability ID", 400);
+    const availability = await DriverAvailability.findById(availability_id);
+    if (!availability) throw AppError("Availability not found", 404);
+    if (availability.driver_id.toString() !== driver_id) throw AppError("Unauthorized", 403);
+
+    await availability.deleteOne();
+    return { success: true };
+}
+
+export {
+    addAvailabilitiesService,
+    getDriverAvailabilitiesService,
+    searchDriverAvailabilitiesService,
+    updateDriverAvailabilityService,
+    deleteDriverAvailabilityService
+}
