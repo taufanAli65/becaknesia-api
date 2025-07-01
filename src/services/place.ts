@@ -1,8 +1,8 @@
 import Place from "../models/places";
 import { AppError } from "../utils/appError";
 
-async function createPlaceService(name: string, coordinates: string, description: string, photo_url: string, category: string) {
-    const place = new Place({name, coordinates, description, photo_url, category});
+async function createPlaceService(name: string, coordinates: string, description: string, category: string, photo_url: string) {
+    const place = new Place({name, coordinates, description, category, photo_url});
     await place.save();
 }
 
@@ -36,7 +36,7 @@ async function getPlaceService(placeID: string) {
     return place;
 }
 
-async function updatePlaceService(placeID: string, name?: string, coordinates?: string, description?: string, photo_url?: string, category?: string) {
+async function updatePlaceService(placeID: string, name?: string, coordinates?: string, description?: string, category?: string, photo_url?: string) {
   if (!placeID) throw AppError("Place ID is required", 400);
   const updateFields: any = {};
   if (name !== undefined) updateFields.name = name;

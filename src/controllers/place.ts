@@ -18,7 +18,7 @@ export const createPlace = async (req: Request, res: Response, next: NextFunctio
         createPlaceSchema.omit({ photo_url: true }),
         req.body
     );
-    await createPlaceService(name, coordinates, description, photo_url, category);
+    await createPlaceService(name, coordinates, description, category, photo_url);
     return sendSuccess(res, 201, "Place created successfully");
   } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
@@ -68,8 +68,8 @@ export const updatePlace = async (req: Request, res: Response, next: NextFunctio
       name,
       coordinates,
       description,
-      photo_url,
-      category
+      category,
+      photo_url
     );
     return sendSuccess(res, 200, "Place updated successfully", updated);
   } catch (error) {
