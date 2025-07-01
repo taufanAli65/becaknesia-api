@@ -22,9 +22,9 @@ export const needTourIDSchema = z.object({
 export const updateTourPackageSchema = z.object({
   route_name: z.string().min(1, "Route name cannot be empty").optional(),
   description: z.string().min(1, "Description cannot be empty").optional(),
-  duration: z.string().optional(),
-  distances: z.string().optional(),
+  duration: z.number().optional(),
+  distances: z.number().optional(),
   routes: z.array(z.string()).optional(),
-  prices: z.string().optional(),
+  prices: z.number().optional(),
   photo_url: z.string().url("Photo URL must be a valid URL")
 });
