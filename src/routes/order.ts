@@ -13,6 +13,6 @@ router.put("/:order_id", authenticated, (req: Request, res: Response, next: Next
 router.delete("/:order_id", authenticated, (req: Request, res: Response, next: NextFunction) => { deleteOrder(req, res, next) });
 router.get("/driver/accepted", authenticated, authorize(userRoles.Driver), (req: Request, res: Response, next: NextFunction) => { getAcceptedOrdersForDriver(req, res, next) });
 router.get("/user/:user_id/all", authenticated, (req: Request, res: Response, next: NextFunction) => { getOrdersByUserID(req, res, next) });
-router.get("/waiting", authenticated, (req: Request, res: Response, next: NextFunction) => { getWaitingOrders(req, res, next) });
+router.get("/waiting", authenticated, authorize(userRoles.Admin), (req: Request, res: Response, next: NextFunction) => { getWaitingOrders(req, res, next) });
 
 export default router;
