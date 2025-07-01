@@ -2,7 +2,6 @@ import DriverAvailability, { daysArray, timesArray } from "../models/driverAvail
 import { Types } from "mongoose";
 import { AppError } from "../utils/appError";
 import Driver from "../models/drivers";
-import User from "../models/users";
 
 interface AddAvailabilityInput {
     driver_id: string;
@@ -28,11 +27,7 @@ async function addAvailabilitiesService(data: AddAvailabilityInput) {
 async function getDriverAvailabilitiesService(driver_id: string) {
     if (!Types.ObjectId.isValid(driver_id)) throw AppError("Invalid driver ID", 400);
     const availabilities = await DriverAvailability.find({ driver_id });
-    const driver_info = await User.findOne({ _id: driver_id });
-    return {
-        availabilities,
-        driver_name: driver_info?.name
-    };
+    return availabilities;
 }
 
 interface SearchAvailabilityInput {

@@ -80,9 +80,24 @@ export async function getAllDriverAvailabilitiesService(page: number = 1, limit:
     if (days) query.days = days;
     if (times) query.times = times;
     const availabilities = await DriverAvailability.find(query).skip(skip).limit(limit);
+
+    // Fetch driver names for each availability
+    const data = await Promise.all(availabilities.map(async (availability) => {
+        // Find the driver document
+        const user = await User.findById(availability.driver_id);
+        let driverName = null;
+        if (user) {
+            driverName = user?.name || null;
+        }
+        return {
+            ...availability.toObject(),
+            driver_name: driverName
+        };
+    }));
+
     const total = await DriverAvailability.countDocuments(query);
     return {
-        data: availabilities,
+        data,
         page,
         limit,
         total,
