@@ -102,4 +102,40 @@ async function deleteScheduleService(schedule_id: string) {
   return deleted;
 }
 
-export { createScheduleService, getSchedulesService, getScheduleService, updateScheduleService, deleteScheduleService };
+async function getDriverAcceptedSchedulesService(driver_id: string, week?: string) {
+  // Validate driver_id
+  if (!driver_id) throw AppError("Driver ID is required", 400);
+
+  let filter: any = { driver_id };
+  if (week) {
+    try {
+      const baseDate = parseISO(week);
+      const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(baseDate, { weekStartsOn: 1 });
+      filter.times = { $gte: weekStart.toISOString(), $lte: weekEnd.toISOString() };
+    } catch {
+      // ignore week filter if invalid
+    }
+  }
+
+  // Join with orders to filter by order_status
+  const schedules = await Schedule.find(filter)
+    .populate({
+      path: "order_id",
+      match: { order_status: orderStatus.Accepted }
+    });
+
+  // Only return schedules where order is accepted
+  const acceptedSchedules = schedules.filter(s => s.order_id);
+
+  return acceptedSchedules;
+}
+
+export {
+  createScheduleService,
+  getSchedulesService,
+  getScheduleService,
+  updateScheduleService,
+  deleteScheduleService,
+  getDriverAcceptedSchedulesService,
+};

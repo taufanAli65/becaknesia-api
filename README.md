@@ -443,6 +443,20 @@ Headers: `Authorization: Bearer <admin_token>`
 }
 ```
 
+### Driver: Get Accepted Schedules (See When to Work)
+**GET** `/schedule/driver/accepted?week=2024-06-01`  
+Headers: `Authorization: Bearer <driver_token>`
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Accepted schedules fetched successfully",
+  "data": [
+    /* array of schedule objects where order status is accepted */
+  ]
+}
+```
+
 ---
 
 ## Reviews

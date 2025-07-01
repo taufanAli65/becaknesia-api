@@ -2,9 +2,9 @@ import { Schema, model, Types } from "mongoose";
 
 export enum orderStatus {
     Waiting = "waiting",
-    Accepted = "Accepted",
+    Accepted = "accepted",
     Done = "done",
-    Canceled = "Canceled"
+    Canceled = "canceled"
 }
 
 export enum paymentStatus {

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { createScheduleService, getSchedulesService, getScheduleService, updateScheduleService, deleteScheduleService } from "../services/schedule";
+import { createScheduleService, getSchedulesService, getScheduleService, updateScheduleService, deleteScheduleService, getDriverAcceptedSchedulesService } from "../services/schedule";
 import { sendSuccess, sendFail } from "../utils/senResponse";
 import { validate } from "../utils/validate";
-import { createScheduleSchema, updateScheduleSchema, needScheduleIDSchema } from "../validators/schedule";
+import { createScheduleSchema, updateScheduleSchema, needScheduleIDSchema, searchDriverSchedulesSchema } from "../validators/schedule";
 
 export const createSchedule = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -56,6 +56,20 @@ export const deleteSchedule = async (req: Request, res: Response, next: NextFunc
     const { schedule_id } = validate(needScheduleIDSchema, req.params);
     await deleteScheduleService(schedule_id);
     return sendSuccess(res, 200, "Schedule deleted successfully");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return sendFail(res, 400, errorMessage, error);
+  }
+};
+
+export const searchDriverSchedules = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const driver_id = req.user.id;
+    const week = req.query.week as string | undefined;
+    // Validate driver_id and week
+    validate(searchDriverSchedulesSchema, { driver_id, week });
+    const schedules = await getDriverAcceptedSchedulesService(driver_id, week);
+    return sendSuccess(res, 200, "Accepted schedules fetched successfully", schedules);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return sendFail(res, 400, errorMessage, error);

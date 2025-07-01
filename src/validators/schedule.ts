@@ -22,3 +22,8 @@ export const updateScheduleSchema = z.object({
 export const needScheduleIDSchema = z.object({
   schedule_id: objectIdSchema
 });
+
+export const searchDriverSchedulesSchema = z.object({
+  driver_id: objectIdSchema,
+  week: z.string().optional()
+});
