@@ -13,7 +13,7 @@ interface AddAvailabilityInput {
 async function addAvailabilitiesService(data: AddAvailabilityInput) {
     const { driver_id, days, times } = data;
     if (!Types.ObjectId.isValid(driver_id)) throw AppError("Invalid driver ID", 400);
-    const driver = await Driver.findById({driver_id});
+    const driver = await Driver.findById(driver_id);
     if (!driver) throw AppError("There is no driver with following ID", 404);
 
     const newAvailability = new DriverAvailability({
